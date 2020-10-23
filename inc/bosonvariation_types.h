@@ -4,10 +4,13 @@
 #include <QQmlComponent>
 #include <QMetaType>
 
-extern "C" {
+/*extern "C" {
 #include "boson_sdk/ReturnCodes.h"
 #include "boson_sdk/EnumTypes.h"
-}
+}*/
+
+#include "boson_sdk_cpp/ClientFiles_C/ReturnCodes.h"
+#include "boson_sdk_cpp/ClientFiles_C/EnumTypes.h"
 
 #define QML_ENUM(name, storageType, ...)\
       enum class name : storageType {\

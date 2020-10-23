@@ -119,7 +119,7 @@ LinuxBuild {
         # QT_INSTALL_QML
         QMAKE_POST_LINK += && $$QMAKE_COPY --dereference --recursive $$[QT_INSTALL_QML] $$DESTDIR/Qt/
 
-        # GetThermal start script
+        # VuIRZoom start script
         QMAKE_POST_LINK += && $$QMAKE_COPY $$BASEDIR/deploy/getthermal-start.sh $$DESTDIR
         QMAKE_POST_LINK += && $$QMAKE_COPY $$BASEDIR/deploy/getthermal.desktop $$DESTDIR
         QMAKE_POST_LINK += && $$QMAKE_COPY $$BASEDIR/icons/getthermal.png $$DESTDIR

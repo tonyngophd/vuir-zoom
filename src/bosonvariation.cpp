@@ -1,14 +1,18 @@
 #include "bosonvariation.h"
 
-extern "C" {
+/*extern "C" {
 #include "boson_sdk/Client_API.h"
 #include "boson_sdk/EnumTypes.h"
 #include "boson_sdk/UART_Connector.h"
 int boson_example();
-}
+}*/
+
+#include "boson_sdk_cpp/ClientFiles_C/Client_API.h"
+#include "boson_sdk_cpp/ClientFiles_C/EnumTypes.h"
+#include "boson_sdk_cpp/ClientFiles_C/UART_Connector.h"
 
 #define QML_REGISTER_ENUM(name) \
-    qmlRegisterUncreatableType<FLR::QE_##name>("GetThermal", 1,0, "FLR_" #name, "You can't create enumeration " #name); \
+    qmlRegisterUncreatableType<FLR::QE_##name>("VuIRZoom", 1,0, "FLR_" #name, "You can't create enumeration " #name); \
     qRegisterMetaType<FLR::QE_##name::E>("FLR_" #name);
 
 void registerBosonVariationQmlTypes()
@@ -24,7 +28,8 @@ BosonVariation::BosonVariation(uvc_context_t *ctx,
   , devh(devh)
   , usb_devh(uvc_get_libusb_handle(devh))
 {
-    printf("Initializing Boson with UVC backend...\n");
+    return;
+    /*printf("Initializing Boson with UVC backend...\n");
 
     uvc_get_device_descriptor(dev, &desc);
     printf("Using %s %s with firmware %s\n", desc->manufacturer, desc->product, desc->serialNumber);
@@ -33,12 +38,12 @@ BosonVariation::BosonVariation(uvc_context_t *ctx,
 
     result = Initialize(usb_devh);
     printf("Initialize: 0x%08X\n", result);
-    if (result)
+    if (result == 2U)
     {
         printf("Failed to initialize CCI interface\n");
     }
 
-    this->setObjectName("BosonVariation");
+    this->setObjectName("BosonVariation");*/
 }
 
 BosonVariation::~BosonVariation()
@@ -56,6 +61,7 @@ const AbstractCCInterface& BosonVariation::operator =(const AbstractCCInterface&
 
 const QString BosonVariation::getCameraPartNumber()
 {
+    return "";
     FLR_BOSON_PARTNUMBER_T pn;
     bosonGetCameraPN(&pn);
     return QString::fromLatin1((char*)pn.value, sizeof(pn.value));
@@ -63,14 +69,15 @@ const QString BosonVariation::getCameraPartNumber()
 
 const QString BosonVariation::getCameraSerialNumber()
 {
-    uint32_t sn;
+    return "";
+    uint32_t sn=0;
     bosonGetCameraSN(&sn);
     return QString::asprintf("%d", sn);
 }
 
 const QString BosonVariation::getSensorPartNumber()
 {
-
+    return "";
     FLR_BOSON_SENSOR_PARTNUMBER_T pn;
     bosonGetSensorPN(&pn);
     return QString::fromLatin1((char*)pn.value, sizeof(pn.value));
@@ -78,14 +85,16 @@ const QString BosonVariation::getSensorPartNumber()
 
 const QString BosonVariation::getSensorSerialNumber()
 {
-    uint32_t sn;
+    return "";
+    uint32_t sn=0;
     bosonGetSensorSN(&sn);
     return QString::asprintf("%d", sn);
 }
 
 const QString BosonVariation::getSoftwareRev()
 {
-    uint32_t maj, min, rev;
+    return "";
+    uint32_t maj=0, min=0, rev=0;
     bosonGetSoftwareRev(&maj, &min, &rev);
     return QString::asprintf("%d.%d.%d", maj, min, rev);
 }
@@ -108,13 +117,15 @@ const QVideoSurfaceFormat BosonVariation::getDefaultFormat()
 
 float BosonVariation::getCameraInternalTempC()
 {
-    int16_t temp_c_x10;
+    return 0;
+    int16_t temp_c_x10 = 0;
     bosonlookupFPATempDegCx10(&temp_c_x10);
     return (float)temp_c_x10 / 10.0f;
 }
 
 void BosonVariation::performFfc()
 {
+    return;
     FLR_RESULT result = bosonRunFFC();
     printf("RunFFC:  0x%08X \n", result);
 }

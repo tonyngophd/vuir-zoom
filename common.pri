@@ -128,9 +128,9 @@ exists ($$PWD/.git) {
     MacBuild {
         MAC_VERSION  = $$section(VERSION, ".", 0, 2)
         MAC_BUILD    = $$section(VERSION, ".", 3, 3)
-        message(GetThermal version $${MAC_VERSION} build $${MAC_BUILD} describe $${GIT_VERSION})
+        message(VuIRZoom version $${MAC_VERSION} build $${MAC_BUILD} describe $${GIT_VERSION})
     } else {
-        message(GetThermal $${GIT_VERSION})
+        message(VuIRZoom $${GIT_VERSION})
     }
 } else {
     GIT_VERSION     = None

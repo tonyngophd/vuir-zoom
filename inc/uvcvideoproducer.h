@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QAbstractVideoSurface>
 #include <QVideoSurfaceFormat>
+#include <QCamera>
+#include <QMediaRecorder>
 #include "uvcacquisition.h"
 
 class UvcVideoProducer : public QObject

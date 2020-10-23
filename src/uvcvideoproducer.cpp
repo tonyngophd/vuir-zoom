@@ -1,5 +1,7 @@
 #include "uvcvideoproducer.h"
 #include "uvcacquisition.h"
+#include "globalforclassvariables.h"
+#include "globalvariables.h"
 
 UvcVideoProducer::UvcVideoProducer(QObject *parent)
     : QObject(parent)
@@ -15,6 +17,9 @@ void UvcVideoProducer::setVideoSurface(QAbstractVideoSurface *surface)
     }
 
     m_surface = surface;
+#ifdef QTVIDRECORD
+    mVidSurface = surface;
+#endif
     printf("Surface set. Supported formats:");
     QList<QVideoFrame::PixelFormat> formats = surface->supportedPixelFormats();
     for (int i = 0; i < formats.length(); i++)
@@ -22,9 +27,14 @@ void UvcVideoProducer::setVideoSurface(QAbstractVideoSurface *surface)
     printf("\n");
     fflush(stdout);
 
-    if (m_uvc)
+    if (m_uvc){
         m_surface->start(m_uvc->videoFormat());
-
+#ifdef QTVIDRECORD
+        if(mVidSurface)
+            mVidSurface->start(m_uvc->videoFormat());
+        qDebug() << "mVidSurface->start(m_uvc->videoFormat());";
+#endif
+    }
     emit surfaceChanged(m_surface);
 }
 
@@ -50,6 +60,10 @@ void UvcVideoProducer::setUvc(UvcAcquisition *uvc)
         fflush(stdout);
 
         m_surface->start(uvc->videoFormat());
+#ifdef QTVIDRECORD
+        if(mVidSurface)
+            mVidSurface->start(m_uvc->videoFormat());
+#endif
     }
 
     connect(m_uvc, &UvcAcquisition::frameReady,
@@ -58,6 +72,13 @@ void UvcVideoProducer::setUvc(UvcAcquisition *uvc)
 
 void UvcVideoProducer::onNewVideoContentReceived(const QVideoFrame &frame)
 {
+    //qDebug() << "UvcVideoProducer: presenting frame " << frame;
     if (m_surface)
         m_surface->present(frame);
+#ifdef QTVIDRECORD
+    if(RecordVideo){
+        if(mVidSurface)
+            mVidSurface->present(frame);
+    }
+#endif
 }

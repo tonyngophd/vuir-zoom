@@ -17,8 +17,8 @@
 	<key>CFBundleExecutable</key>
 	<string>@EXECUTABLE@</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.groupgets.getthermal</string>
+        <string>com.suas.vuirthermal</string>
 	<key>NOTE</key>
-	<string>Open source GetThermal app provided by GroupGets and GetLab</string>
+        <string>Open source VuIRZoom app provided by GroupGets, GetLab and sUAS LLC</string>
 </dict>
 </plist>

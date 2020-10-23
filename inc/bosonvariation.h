@@ -8,9 +8,11 @@
 #include "abstractccinterface.h"
 #include "bosonvariation_types.h"
 
-extern "C" {
+/*extern "C" {
 #include "boson_sdk/Client_API.h"
-}
+}*/
+
+#include "boson_sdk_cpp/ClientFiles_C/Client_API.h"
 
 #include <functional>
 using namespace std;

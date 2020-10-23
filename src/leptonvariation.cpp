@@ -23,7 +23,7 @@ typedef enum {
 } VC_TERMINAL_ID;
 
 #define QML_REGISTER_ENUM(name) \
-    qmlRegisterUncreatableType<LEP::QE_##name>("GetThermal", 1,0, "LEP_" #name, "You can't create enumeration " #name); \
+    qmlRegisterUncreatableType<LEP::QE_##name>("VuIRZoom", 1,0, "LEP_" #name, "You can't create enumeration " #name); \
     qRegisterMetaType<LEP::QE_##name::E>("LEP_" #name);
 
 void registerLeptonVariationQmlTypes()

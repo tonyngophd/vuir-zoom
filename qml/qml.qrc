@@ -16,6 +16,8 @@
         <file>boson/VidControls.qml</file>
         <file>controls/SpotInfo.qml</file>
         <file>controls/VideoRoi.qml</file>
+        <file>videoview.qml</file>
+        <file>videoview_ocv.qml</file>
     </qresource>
     <qresource prefix="/images">
         <file>images/brand-logo.png</file>
