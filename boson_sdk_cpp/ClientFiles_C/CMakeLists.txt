@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 2.8)
+project( bosonSDK )
+include_directories(, 	/../FSLP_Files/src, 	/../FSLP_Files/src/inc, ..//../FS
+LP_Files/src/linux , /usr/lib/arm-linux-gnueabihf/)
+find_package( OpenCV REQUIRED )
+add_executable( bosonSDK  Client_API.c         Client_Packager.c    Example.c  MultiServiceSupport.c    Serializer_Struct.c  UPTClient.c Client_Dispatcher.c     dataServiceClient.c  fifo.c     Serializer_BuiltIn.c      UART_Connector.c ../FSLP_Files/src/flirChannels.c     ../FSLP_Files/src/flirCRC.c  ../FSLP_Files/src/FSLP.c     ../FSLP_Files/src/timeoutLogic.c ../FSLP_Files/src/linux/serial.c     ../FSLP_Files/src/linux/serialPortAdapter.c )
+target_link_libraries( bosonSDK  )
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(bosonSDK Threads::Threads)
+target_link_libraries(bosonSDK X11)
+set(CMAKE_C_STANDARD 11)
+add_compile_options(-Wall -lX11)

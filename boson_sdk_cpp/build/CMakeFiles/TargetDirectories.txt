@@ -1,0 +1,3 @@
+/home/pi/bosonPi/bosonSDK_dir/build/CMakeFiles/rebuild_cache.dir
+/home/pi/bosonPi/bosonSDK_dir/build/CMakeFiles/bosonSDK.dir
+/home/pi/bosonPi/bosonSDK_dir/build/CMakeFiles/edit_cache.dir
