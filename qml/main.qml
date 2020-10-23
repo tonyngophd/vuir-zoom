@@ -57,10 +57,13 @@ ApplicationWindow {
             console.log("\nVideoViewObject created = ", videoViewObject[i], "\n\n mainWindow = ", mainWindow);
             if(i == 0 ){
                 console.log("i = ", i);
-                moveToMainView(i);
+                moveToRightView(i);
+//                moveToLeftView(i);
             } else {
                 console.log("i = ", i);
-                moveToSideView(i, i);
+//                moveToRightView(i);
+                moveToLeftView(i);
+                //moveToSideView(i, i);
             }
         }
         if(total_uvc_openings < numberOfCameras){
@@ -80,6 +83,29 @@ ApplicationWindow {
                 //timer.start();
             }
         }
+    }
+
+    function moveToLeftView(vn){
+        //videoViewObject[vn].acq.resumeStream();
+        videoViewObject[vn].videoOutput.viewLocation = "mv";
+        videoViewObject[vn].videoOutput.height = mainWindow.height*512/640;//mainWindow.height;
+        videoViewObject[vn].videoOutput.width =  mainWindow.height;//videoViewObject[vn].videoOutput.height * 640 / 512;
+        videoViewObject[vn].videoOutput.x = videoViewObject[vn].videoOutput.height*195/400;
+        videoViewObject[vn].videoOutput.y = videoViewObject[vn].videoOutput.height*1867/3000;
+        videoViewObject[vn].videoView.z = 0;
+        videoViewObject[vn].videoView.rotation = 90;
+        //videoViewObject[vn].videoView.visible = true;
+    }
+    function moveToRightView(vn){
+        //videoViewObject[vn].acq.resumeStream();
+        videoViewObject[vn].videoOutput.viewLocation = "mv";
+        videoViewObject[vn].videoOutput.height = mainWindow.height*512/640;//mainWindow.height;
+        videoViewObject[vn].videoOutput.width =  mainWindow.height;//videoViewObject[vn].videoOutput.height * 640 / 512;
+        videoViewObject[vn].videoOutput.x = videoViewObject[vn].videoOutput.height*195/400;
+        videoViewObject[vn].videoOutput.y = videoViewObject[vn].videoOutput.height*1867/3000;
+        videoViewObject[vn].videoView.z = 0;
+        videoViewObject[vn].videoView.rotation = -90;
+        //videoViewObject[vn].videoView.visible = true;
     }
 
     /*MouseArea {
