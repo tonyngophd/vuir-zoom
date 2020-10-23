@@ -6,8 +6,8 @@ import VuIRZoom 1.0
 ApplicationWindow {
     id: mainWindow
     visible: true
-    width: 1280
-    height:720
+    width: 1138;//1280
+    height: 640;//720
     //title: qsTr("VuIRZoom")
 
     /*Viewer {
@@ -90,8 +90,8 @@ ApplicationWindow {
         videoViewObject[vn].videoOutput.viewLocation = "mv";
         videoViewObject[vn].videoOutput.height = mainWindow.height*512/640;//mainWindow.height;
         videoViewObject[vn].videoOutput.width =  mainWindow.height;//videoViewObject[vn].videoOutput.height * 640 / 512;
-        videoViewObject[vn].videoOutput.x = videoViewObject[vn].videoOutput.height*195/400;
-        videoViewObject[vn].videoOutput.y = videoViewObject[vn].videoOutput.height*1867/3000;
+        videoViewObject[vn].videoOutput.x = (mainWindow.width - mainWindow.height)/2;//videoViewObject[vn].videoOutput.height*1945/4000;
+        videoViewObject[vn].videoOutput.y = mainWindow.height/2;//1876/3000; // 10/16 === 640/(2*512) === 640/1024 mainWindow.height/2
         videoViewObject[vn].videoView.z = 0;
         videoViewObject[vn].videoView.rotation = 90;
         //videoViewObject[vn].videoView.visible = true;
@@ -101,8 +101,8 @@ ApplicationWindow {
         videoViewObject[vn].videoOutput.viewLocation = "mv";
         videoViewObject[vn].videoOutput.height = mainWindow.height*512/640;//mainWindow.height;
         videoViewObject[vn].videoOutput.width =  mainWindow.height;//videoViewObject[vn].videoOutput.height * 640 / 512;
-        videoViewObject[vn].videoOutput.x = videoViewObject[vn].videoOutput.height*195/400;
-        videoViewObject[vn].videoOutput.y = videoViewObject[vn].videoOutput.height*1867/3000;
+        videoViewObject[vn].videoOutput.x = (mainWindow.width - mainWindow.height)/2;//videoViewObject[vn].videoOutput.height*1945/4000;
+        videoViewObject[vn].videoOutput.y = mainWindow.height/2;//1876/3000;
         videoViewObject[vn].videoView.z = 0;
         videoViewObject[vn].videoView.rotation = -90;
         //videoViewObject[vn].videoView.visible = true;
