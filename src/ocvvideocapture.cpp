@@ -286,7 +286,6 @@ QImage  OCVVideoCapture::cvMatToQImage( const cv::Mat &inMat )
                       inMat.cols, inMat.rows,
                       static_cast<int>(inMat.step),
                       QImage::Format_ARGB32 );
-        //qDebug() << "QImage::Format_ARGB32 ";
         return image;
     }
 
@@ -297,41 +296,17 @@ QImage  OCVVideoCapture::cvMatToQImage( const cv::Mat &inMat )
                       inMat.cols, inMat.rows,
                       static_cast<int>(inMat.step),
                       QImage::Format_RGB888 );
-        //qDebug() << "QImage::Format_RGB888 ";
         return image;
-        //return image.rgbSwapped();
     }
 
         // 8-bit, 1 channel
     case CV_8UC1:
     {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
+//#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
         QImage image( inMat.data,
                       inMat.cols, inMat.rows,
                       static_cast<int>(inMat.step),
                       QImage::Format_Grayscale8 );
-        //qDebug() << "QImage::Format_Grayscale8 ";
-#else
-        static QVector<QRgb>  sColorTable;
-
-        // only create our color table the first time
-        if ( sColorTable.isEmpty() )
-        {
-            sColorTable.resize( 256 );
-
-            for ( int i = 0; i < 256; ++i )
-            {
-                sColorTable[i] = qRgb( i, i, i );
-            }
-        }
-
-        QImage image( inMat.data,
-                      inMat.cols, inMat.rows,
-                      static_cast<int>(inMat.step),
-                      QImage::Format_Indexed8 );
-
-        image.setColorTable( sColorTable );
-#endif
 
         return image;
     }

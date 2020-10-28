@@ -31,6 +31,7 @@
 extern "C" {
 //#include <libavcodec/avcodec.h>
 //#include <libavformat/avformat.h>
+    #include <globalflirvariables.h>
 }
 
 #include "abstractccinterface.h"
@@ -110,9 +111,7 @@ private:
     int _odd_even_skip = 0;
     struct timeval now, previous;
     bool _uvc_is_streaming = false;
-#ifdef USE_OPENCV
-    cv::VideoWriter videowriter;
-#endif
+    int _camera_number = 0;
 };
 
 #endif // UVCACQUISITION_H

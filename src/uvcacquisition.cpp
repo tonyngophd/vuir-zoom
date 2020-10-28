@@ -119,6 +119,7 @@ void UvcAcquisition::init()
         res = uvc_find_device(ctx, &dev, _ids[i].vid, _ids[i].pid, _ids[i].isn);
         qDebug() << "\n\n i = " << i << " RES = " << res << " ctx = " << ctx << " dev = " << dev << "vid, pid = " << _ids[i].vid << _ids[i].pid <<"\n\n";
         if (res >= 0){
+            _camera_number = i;
             uvc_start_number[uvc_instance] = i + 1;
             break;
         }
@@ -406,14 +407,9 @@ void UvcAcquisition::emitRearangeVideoViewsSignal(int mainViewNo){
 void UvcAcquisition::savepictures(const QVideoFrame &frame){
     if(SaveAPicture){         
         char fileName[150];
-        sprintf(fileName, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.jpg", sub_folder_name, _pictureNo++);
-        //sprintf(fileName, "VuIRBoson_%03d.jpg", _pictureNo++);
+        sprintf(fileName, "/media/pi/VUIR_DATA/%s/VuIRBoson%02d_%03d.jpg", sub_folder_name, _camera_number, _pictureNo++);
+        //"/mnt/suascom/VuIRBoson%02d_%1.jpg"
         qt_imageFromVideoFrame(frame).save(fileName, 0, 100);
-        //QImage img = qt_imageFromVideoFrame(frame);
-        //qDebug() << "Save result" << img.save(fileName, 0, 100);
-        //qDebug() << "Save result" << qt_imageFromVideoFrame(frame).save(fileName, 0, -1);
-        //QString fileName = QStringLiteral("/mnt/suascom/VuIRBoson_%1.jpg").arg(_pictureNo);
-        //qDebug() << "fileName = " << fileName << "SaveAPicture = " << SaveAPicture << endl;
         SaveAPicture = false;
     }
 }
@@ -435,56 +431,14 @@ void UvcAcquisition::recordThisFrame(const uint8_t *uvc_frame_data){
 void UvcAcquisition::recordThisFrame(const QVideoFrame &frame){
     if(RecordVideo){
         if(frameImageSaved){
-            frameImage = qt_imageFromVideoFrame(frame);
-            frameImageReady = true;
-            frameImageSaved = false;
-        }
-        //QString fileName = QStringLiteral("/mnt/suascom/tempics/VuIRBoson_%1.png").arg(_pictureNo_forVideo++);
-        //QString fileName = QStringLiteral("/tempics/VuIRBoson_%1.png").arg(_pictureNo_forVideo++);
-#ifdef USE_OPENCV
-        /*char filename[100];
-        sprintf(filename, "/mnt/suascom/tempics/VuIRBoson_%03d.png", _pictureNo_forVideo++);
-        if(!videowriter.isOpened()){
-            //videowriter.open("/mnt/suascom/VuIRBosonVid.mp4",cv::VideoWriter::fourcc('m','p','4','v'),30, cv::Size(640, 512), true); //This WORKS
-            //videowriter.open("/mnt/suascom/VuIRBosonVid.mp4",cv::CAP_FFMPEG,cv::VideoWriter::fourcc('m','p','4','v'),30, cv::Size(640, 512),true);
-            //videowriter.open("/mnt/suascom/VuIRBosonVid.wmv",cv::CAP_FFMPEG,cv::VideoWriter::fourcc('W', 'M', 'V', '2'),30, cv::Size(640, 512), true); //This WORKS
-            //videowriter.open("/mnt/suascom/VuIRBosonVid.avi",cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),30, cv::Size(640, 512), true); //This WORKS
-            //videowriter.open("/mnt/suascom/VuIRBosonVid.mp4",cv::CAP_FFMPEG,cv::VideoWriter::fourcc('m','p','4','v'),30, cv::Size(640, 512), true); //This WORKS
-            qDebug() << "Open = " << videowriter.open("/mnt/suascom/VuIRBosonVid.avi",cv::VideoWriter::fourcc('F', 'L', 'V', '1'),30, cv::Size(640, 512), true); //This WORKS
-            //videowriter = cv::VideoWriter("/mnt/suascom/VuIRBosonVid.avi",cv::VideoWriter::fourcc('D','I','V','X'),30, cv::Size(640, 512), true); //This WORKS
-            qDebug() << "videowriter.set(cv::VIDEOWRITER_PROP_QUALITY, 50) = " << videowriter.set(cv::VIDEOWRITER_PROP_QUALITY, 50);
-            qDebug() << "videowriter.get(cv::VIDEOWRITER_PROP_IS_COLOR) = " << videowriter.get(cv::VIDEOWRITER_PROP_IS_COLOR);
-
-        }
-        cv::Mat mat = ASM::QImageToCvMat(qt_imageFromVideoFrame(frame), false);
-        videowriter.write(mat);*/
-        //videowriter.operator<<(mat);
-        //cv::imshow("Test show", mat);
-        //cv::waitKey(5);
-        //qDebug() << "videowriter.get(cv::VIDEOWRITER_PROP_QUALITY) = " << videowriter.get(cv::VIDEOWRITER_PROP_QUALITY);
-        //cout << "videowriter.getBackendName() = " << videowriter.getBackendName() << endl;*/
-        /*_pictureNo++;
-        if(_pictureNo%30 == 0){
-            char fileName[100];
-            sprintf(fileName, "/mnt/suascom/VuIRBoson_%d.png", _pictureNo);
-            cv::imwrite(fileName, mat);
-        }*/
-        //qDebug() << "mat.cols = " << mat.cols << " mat.rows = " << mat.rows;
-        //qDebug() << "videowriter written RecordVideo = " << RecordVideo << " StopVideoRecording = " << StopVideoRecording ;
-        //qDebug() << "mat.empty() = " << mat.empty() << " videowriter.isOpened() = " << videowriter.isOpened();
-        //videowriter.write(imageToMat8(qt_imageFromVideoFrame(frame)));
-        //qDebug() << "StartRecordVideo = " << StartRecordVideo << "alreadyRecording = " << alreadyRecording;
-        //qDebug() << "alreadyStopRec = " << alreadyStopRec;
-    //} else {
-        /*if(StopVideoRecording){
-            if(videowriter.isOpened()){
-                videowriter.release();
-                //videowriter.~VideoWriter();
-                qDebug() << "videowriter.release();";
+            //Only save the video frame of the camera in the main view
+            //Todo: need to be able to save frames from other cameras to different videos too
+            if(_camera_number == globalVideoViewOrderNo){
+                frameImage = qt_imageFromVideoFrame(frame);
+                frameImageReady = true;
+                frameImageSaved = false;
             }
-            StopVideoRecording = false;
-        }*/
-#endif
+        }
     }
 }
 

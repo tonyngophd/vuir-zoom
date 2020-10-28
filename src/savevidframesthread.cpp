@@ -144,7 +144,7 @@ void SaveVidFramesThread::run()
                 char picname[150];
                 sprintf(videoNameArg, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
                 sprintf(picname, "/media/pi/VUIR_DATA/%s/tempics/frame_%%06d.jpg", sub_folder_name);
-                //sprintf(videoNameArg, "VuIRBoson_%03d.avi", videoNumber++);
+                //sprintf(videoNameArg, "VuIRBoson%02d_%03d.avi", videoNumber++);
                 _paramList << "-y"
                            << "-framerate"
                            << QString::number(real_averaged_fps)
