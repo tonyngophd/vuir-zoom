@@ -288,19 +288,20 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
         break;
 
       case REC_CHANNEL:
-        SaveAPicture = true;
-        //cout << "in ag_aux_funcs SaveAPiture = " << SaveAPicture << endl;
         if(!strcmp(sub_folder_name, "")){
             FolderTasks(BosonResolution[0]);
         }
+        SaveAPicture = true;
+        //cout << "in ag_aux_funcs SaveAPiture = " << SaveAPicture << endl;
         break;
       case PI_REC_CHANNEL:        
+        if(!strcmp(sub_folder_name, "")){
+            FolderTasks(BosonResolution[0]);
+        }
         RecordVideo = !RecordVideo;//(Value != 0);
         StopVideoRecording = !RecordVideo;
         //cout << "in ag_aux_funcs StartRecordVideo = " << RecordVideo << "Value = " << Value << endl;
-        if(!strcmp(sub_folder_name, "")){
-            FolderTasks(BosonResolution[0]);
-        }
+        cout << "sub_folder_name =" << sub_folder_name << endl;
         break;
 
       case SELECT_CAM_CHANNEL:
@@ -537,6 +538,7 @@ void FolderTasks(uint16_t BosonResolution0){
     if(!dirExists(sub_folder_name)){
         mkdir(sub_folder_name, 0777);
     }*/
+    printf(WHT ">>> Creating " YEL "%s" WHT " sub_folder\n", sub_folder_name);
     mkdir(sub_folder_name, 0777); //0700
     //chdir(sub_folder_name);
     //chdir("/home/pi/qt_projects/VuIRZoom/VuIRZoom/build");

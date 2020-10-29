@@ -13,7 +13,7 @@
 //#define QTVIDRECORD
 
 
-extern QImage frameImage;
+extern QImage frameImage[4];
 extern int uvc_instance;
 extern int uvc_start_number[4];
 extern int ocv_instance;

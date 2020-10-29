@@ -8,20 +8,6 @@
 #include <QObject>
 #include <QVideoFrame>
 #include <QVideoSurfaceFormat>
-#ifdef USE_OPENCV
-#include <opencv2/opencv.hpp>
-#include <opencv2/imgcodecs/imgcodecs.hpp>
-#include <opencv2/videoio/videoio.hpp>
-//#include <opencv2/imgcodecs.hpp>
-//#include <opencv2/videoio.hpp>
-#include <opencv2/highgui.hpp>
-#include <linux/videodev2.h>
-#include <opencv2/core.hpp>
-//#include "/home/pi/installation/OpenCV-master/include/opencv4/opencv2/opencv.hpp"
-//#include "/home/pi/installation/OpenCV-master/include/opencv4/opencv2/imgcodecs/imgcodecs.hpp"
-//#include "/home/pi/installation/OpenCV-master/include/opencv4/opencv2/videoio/videoio.hpp"
-//#include "/home/pi/installation/OpenCV-master/include/opencv4/opencv2/highgui.hpp"
-#endif
 
 #include <libuvc/libuvc.h>
 #include <unistd.h>

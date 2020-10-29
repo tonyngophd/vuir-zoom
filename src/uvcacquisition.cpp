@@ -407,7 +407,7 @@ void UvcAcquisition::emitRearangeVideoViewsSignal(int mainViewNo){
 void UvcAcquisition::savepictures(const QVideoFrame &frame){
     if(SaveAPicture){         
         char fileName[150];
-        sprintf(fileName, "/media/pi/VUIR_DATA/%s/VuIRBoson%02d_%03d.jpg", sub_folder_name, _camera_number, _pictureNo++);
+        sprintf(fileName, "/media/pi/VUIR_DATA/%s/VuIRBoson%01d_%03d.jpg", sub_folder_name, _camera_number, _pictureNo++);
         //"/mnt/suascom/VuIRBoson%02d_%1.jpg"
         qt_imageFromVideoFrame(frame).save(fileName, 0, 100);
         SaveAPicture = false;
@@ -420,24 +420,24 @@ void UvcAcquisition::setSaveAPictureTrue(){
 
 void UvcAcquisition::recordThisFrame(const uint8_t *uvc_frame_data){
     if(RecordVideo){
-        if(frameImageSaved){
+        if(frameImageSaved[_camera_number]){
             memcpy(ff_rawFrame, uvc_frame_data, size640x512x4);//640*512*4
             //qDebug() << "Number of uvc_frame_data bytes = " << malloc_usable_size((void*)uvc_frame_data) << "size640x512x4 = " << size640x512x4;
-            frameImageReady = true;
-            frameImageSaved = false;
+            frameImageReady[_camera_number] = true;
+            frameImageSaved[_camera_number] = false;
         }
     }
 }
 void UvcAcquisition::recordThisFrame(const QVideoFrame &frame){
     if(RecordVideo){
-        if(frameImageSaved){
+        if(frameImageSaved[_camera_number]){
             //Only save the video frame of the camera in the main view
             //Todo: need to be able to save frames from other cameras to different videos too
-            if(_camera_number == globalVideoViewOrderNo){
-                frameImage = qt_imageFromVideoFrame(frame);
-                frameImageReady = true;
-                frameImageSaved = false;
-            }
+            //if(_camera_number == globalVideoViewOrderNo){
+            frameImage[_camera_number] = qt_imageFromVideoFrame(frame);
+            frameImageReady[_camera_number] = true;
+            frameImageSaved[_camera_number] = false;
+            //}
         }
     }
 }

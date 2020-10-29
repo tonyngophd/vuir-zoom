@@ -4,10 +4,12 @@
 #include "ffmpgegvideorecorder.h"
 #include "videoviewscontroller.h"
 #include <QUrl>
+#include <QPainter>
+#include <QPoint>
 
-QImage frameImage;
-bool frameImageReady = false;
-bool frameImageSaved = true;
+QImage frameImage[4];
+bool frameImageReady[4] = {false, false, false, false};
+bool frameImageSaved[4] = {true, true, true, true};
 int frameImageNumber = 0;
 char frameImageFileName[100];
 bool frameRecording = false;
@@ -54,65 +56,43 @@ void SaveVidFramesThread::run()
     int videoNumber = 0;
     bool tempics_dir_not_created = true;
     gettimeofday(&previous, nullptr);
-    //VideoViewsController mVideoViewsController;
+    QImage combinedImage = QImage(640, 1024, !frameImage[0].isNull()?frameImage[0].format():QImage::Format_ARGB32);
+    QPainter painter(&combinedImage);
+    QTransform rotating;//, rotatingM90, rotatingP90;
+    rotating.rotate(180);//    rotatingM90.rotate(-90);//    rotatingP90.rotate(90);
     while(true){
         usleep(1000); //1 millisecond so that this thread doesn't check value of RecordVideo 100% of the time, reducing cpu usage
         if(RecordVideo){
             if(tempics_dir_not_created){
                 char mkdir_tempics[150];
-                sprintf(mkdir_tempics, "mkdir /media/pi/VUIR_DATA/%s/tempics", sub_folder_name);
+                sprintf(mkdir_tempics, "mkdir -p /media/pi/VUIR_DATA/%s/tempics", sub_folder_name);
+                qDebug() << mkdir_tempics;
                 system(mkdir_tempics);
                 tempics_dir_not_created = false;
             }
-#ifdef QTVIDRECORD
-            if(mRecorder == nullptr){
-                mCamera = new QCamera;
-                mCamera->setViewfinder(mVidSurface);
-                mRecorder = new QMediaRecorder(mCamera);
-                mEncoderSettings = mRecorder->videoSettings();
-                mEncoderSettings.setResolution(640,512);
-                mEncoderSettings.setQuality(QMultimedia::HighQuality);
-                mEncoderSettings.setFrameRate(30.0);
-                //mEncoderSettings.setCodec("video/mp4");
-
-                mRecorder->setVideoSettings(mEncoderSettings);
-                mRecorder->setContainerFormat("mp4");
-                mRecorder->setOutputLocation(QUrl::fromLocalFile("qvideo.mp4"));
-                mCamera->setCaptureMode(QCamera::CaptureVideo);
-                mCamera->start();
-            }
-            if(mRecorder->state() == QMediaRecorder::StoppedState){
-                mRecorder->record();
-                qDebug() << "mRecorder->record();";
-                qDebug()<<mRecorder->state();
-                qDebug()<<mRecorder->status();
-                qDebug()<<mRecorder->error();
-            }
-#endif
-            if(frameImageReady && !frameImageSaved){
+            if(frameImageReady[0] && frameImageReady[1] && !frameImageSaved[0] && !frameImageSaved[1]){
                 if(frameImageNumber <= startFrameNo){
                     gettimeofday(&now, nullptr);
                     uint32_t real_averaged_fps = 0;
                     uint16_t counter = 0;
                     frameImageNumber = startFrameNo;
                 }
-#if CPP_FFMPEG_RECORD
-                frameImageSaved = true;
-                frameImageReady = false;
-                ffmpeg_pushFrame(ff_rawFrame);
-                frameImageNumber++;
-#elif QIMAGERECORD
                 sprintf(filename, "/media/pi/VUIR_DATA/%s/tempics/frame_%06d.jpg", sub_folder_name, frameImageNumber++);
-                //sprintf(filename, "tempics/frame_%06d.jpg", frameImageNumber++);
-                //qDebug() << "Saving " << frameImageNumber;
-                //qDebug() << "Saving to file name = " << filename;
-                if(!frameImage.isNull())
+                if(!frameImage[0].isNull() && !frameImage[1].isNull())
                 {
-                    frameImage.save(filename, 0, 60);
-                    frameImageSaved = true;
-                    frameImageReady = false;
+                    painter.setCompositionMode(QPainter::CompositionMode_Source);
+                    painter.drawImage(0, 0, frameImage[0].transformed(rotating));//rotatingM90));
+                    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+                    painter.drawImage(0, 512, frameImage[1]);//.transformed(rotatingP90));
+                    frameImageSaved[0] = true;
+                    frameImageSaved[1] = true;
+                    frameImageReady[0] = false;
+                    frameImageReady[1] = false;
+                    if(!combinedImage.isNull()) {
+                        //qDebug() << "SAVING combined Image!" << filename;
+                        combinedImage.save(filename, nullptr, 60);
+                    }
                 }
-#endif
                 if(frameImageNumber%60 == 0){ //Todo change this to 60 if use full60fps_VuIRThermal
                     previous = now;
                     gettimeofday(&now, nullptr);

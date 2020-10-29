@@ -3,8 +3,8 @@
 
 #include <cstdint>
 
-extern bool frameImageReady;
-extern bool frameImageSaved;
+extern bool frameImageReady[4];
+extern bool frameImageSaved[4];
 extern int frameImageNumber;
 extern char frameImageFileName[100];
 extern bool frameRecording;
