@@ -4,6 +4,9 @@
 #include "globalforclassvariables.h"
 #include "globalvariables.h"
 
+#include <QImage>
+
+QImage qt_imageFromVideoFrame(const QVideoFrame& f);
 
 uint32_t omillis(){
     struct timeval tp;
@@ -233,6 +236,8 @@ void OCVVideoCapture::run()
             QVideoFrame mQvidframe(buffer, m_format.frameSize(), m_format.pixelFormat());
             //qDebug() << "mQvidframe ready " << mQvidframe;
             emitFrameReady(mQvidframe);
+            recordThisFrame(mQvidframe);
+            savepictures(mQvidframe);
         }
         //if((frame_no++)%2 == 0) usleep(30000);
         if((frame_no++) % 61 == 0 ){
@@ -245,6 +250,28 @@ void OCVVideoCapture::run()
     }
 }
 
+void OCVVideoCapture::recordThisFrame(const QVideoFrame &frame){
+    if(RecordVideo){
+        if(frameImageSaved[_mOCV_instance]){
+            //Only save the video frame of the camera in the main view
+            //Todo: need to be able to save frames from other cameras to different videos too
+            //if(_camera_number == globalVideoViewOrderNo){
+            frameImage[_mOCV_instance] = qt_imageFromVideoFrame(frame);
+            frameImageReady[_mOCV_instance] = true;
+            frameImageSaved[_mOCV_instance] = false;
+            //}
+        }
+    }
+}
+void OCVVideoCapture::savepictures(const QVideoFrame &frame){
+    if(SaveAPicture){
+        char fileName[150];
+        sprintf(fileName, "/media/pi/VUIR_DATA/%s/VuIRBoson%01d_%03d.jpg", sub_folder_name, _mOCV_instance, _pictureNo++);
+        //"/mnt/suascom/VuIRBoson%02d_%1.jpg"
+        qt_imageFromVideoFrame(frame).save(fileName, 0, 100);
+        SaveAPicture = false;
+    }
+}
 void OCVVideoCapture::setVideoFormat(const QVideoSurfaceFormat &format){
     m_uvc_format = format;
 

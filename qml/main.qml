@@ -58,12 +58,9 @@ ApplicationWindow {
             if(i == 0 ){
                 console.log("i = ", i);
                 moveToRightView(i);
-//                moveToLeftView(i);
             } else {
                 console.log("i = ", i);
-//                moveToRightView(i);
-                moveToLeftView(i);
-                //moveToSideView(i, i);
+                moveToLeftView(i); //moveToSideView(i, i);
             }
         }
         if(total_uvc_openings < numberOfCameras){
@@ -72,13 +69,13 @@ ApplicationWindow {
             for(i=total_uvc_openings; i < numberOfCameras; i++){
                 videoViewObject[i] = component_ocv.createObject(mainWindow);
 
-                console.log("\nVideoViewObject created = ", videoViewObject[i], "\n\n mainWindow = ", mainWindow);
+                console.log("\nOpenCV VideoViewObject created = ", videoViewObject[i], "\n\n mainWindow = ", mainWindow);
                 if(i == 0 ){
                     console.log("i = ", i);
-                    moveToMainView(i);
+                    moveToRightView(i); // moveToMainView(i);
                 } else {
                     console.log("i = ", i);
-                    moveToSideView(i, i);
+                    moveToLeftView(i); // moveToSideView(i, i);
                 }
                 //timer.start();
             }
@@ -86,6 +83,13 @@ ApplicationWindow {
     }
 
     function moveToLeftView(vn){
+        moveView(vn, 90);
+    }
+    function moveToRightView(vn){
+        moveView(vn, -90);
+    }
+
+    function moveView(vn, degree){
         //videoViewObject[vn].acq.resumeStream();
         videoViewObject[vn].videoOutput.viewLocation = "mv";
         videoViewObject[vn].videoOutput.height = mainWindow.height*512/640;//mainWindow.height;
@@ -93,18 +97,7 @@ ApplicationWindow {
         videoViewObject[vn].videoOutput.x = (mainWindow.width - mainWindow.height)/2;//videoViewObject[vn].videoOutput.height*1945/4000;
         videoViewObject[vn].videoOutput.y = mainWindow.height/2;//1876/3000; // 10/16 === 640/(2*512) === 640/1024 mainWindow.height/2
         videoViewObject[vn].videoView.z = 0;
-        videoViewObject[vn].videoView.rotation = 90;
-        //videoViewObject[vn].videoView.visible = true;
-    }
-    function moveToRightView(vn){
-        //videoViewObject[vn].acq.resumeStream();
-        videoViewObject[vn].videoOutput.viewLocation = "mv";
-        videoViewObject[vn].videoOutput.height = mainWindow.height*512/640;//mainWindow.height;
-        videoViewObject[vn].videoOutput.width =  mainWindow.height;//videoViewObject[vn].videoOutput.height * 640 / 512;
-        videoViewObject[vn].videoOutput.x = (mainWindow.width - mainWindow.height)/2;//videoViewObject[vn].videoOutput.height*1945/4000;
-        videoViewObject[vn].videoOutput.y = mainWindow.height/2;//1876/3000;
-        videoViewObject[vn].videoView.z = 0;
-        videoViewObject[vn].videoView.rotation = -90;
+        videoViewObject[vn].videoView.rotation = degree;
         //videoViewObject[vn].videoView.visible = true;
     }
 

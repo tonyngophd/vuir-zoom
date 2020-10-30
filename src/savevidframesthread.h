@@ -14,7 +14,7 @@ public:
     SaveVidFramesThread();//QImage outImage, int *outfileNo);
 
 private:
-    QImage image;
+    QImage combinedImage;
     int *fileNo;
 
 protected:

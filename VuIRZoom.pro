@@ -78,7 +78,11 @@ SOURCES += \
     src/videoviewscontroller.cpp \
     src/callcppfunctionsfromqml.cpp \
     src/ocvvideocapture.cpp \
-    src/ocvvideoproducer.cpp
+    src/ocvvideoproducer.cpp \
+    libqtavi/QAviWriter.cpp \
+    libgwavi/src/avi-utils.c \
+    libgwavi/src/fileio.c \
+    libgwavi/src/gwavi.c
 
 RESOURCES += qml/qml.qrc
 
@@ -154,7 +158,13 @@ HEADERS += \
     inc/globalflirvariables.h \
     src/callcppfunctionsfromqml.h \
     src/ocvvideocapture.h \
-    src/ocvvideoproducer.h
+    src/ocvvideoproducer.h \
+    libqtavi/QAviWriter.h \
+    libgwavi/inc/gwavi.h \
+    libgwavi/src/avi-utils.h \
+    libgwavi/src/gwavi_private.h \
+    libgwavi/src/fileio.h
+
 
 DISTFILES += \
     qml/qtquickcontrols2.conf
@@ -176,7 +186,7 @@ LIBS +=  -lpigpio -lrt
 # -lwiringPi
 #-Wall -lX11  -Wextra -Wconversion -Wuninitialized -DRaspberryPi -pedantic
 
-QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS
+QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS -fPIC ${INCLUDES} -D_FILE_OFFSET_BITS=64
 #LIBS += -pthread
 #LIBS += -L/usr/local/lib
 #LIBS += -lavdevice
@@ -212,7 +222,8 @@ QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS
 INCLUDEPATH += $$PWD/lepton_sdk/Inc \
                $$PWD/libuvc/build/include \
                $$PWD/libuvc/include \
-               $$PWD/inc
+               $$PWD/inc \
+               #$$PWD/libqtavi
 DEPENDPATH += $$PWD/libuvc/build/include \
               $$PWD/libuvc/include
 

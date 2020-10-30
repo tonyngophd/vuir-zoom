@@ -89,11 +89,13 @@ private:
     int _mOCV_instance = 0;
     bool _mocv_streaming = false;
     bool _fd_opened = false;
+    int _pictureNo = 0;
 
     QImage  cvMatToQImage( const cv::Mat &inMat );
     QPixmap cvMatToQPixmap( const cv::Mat &inMat );
     void emitFrameReady(const QVideoFrame &frame);
-
+    void recordThisFrame(const QVideoFrame &frame);
+    void savepictures(const QVideoFrame &frame);
 };
 
 

@@ -6,6 +6,9 @@
 #include <QUrl>
 #include <QPainter>
 #include <QPoint>
+#include <QThreadPool>
+#include <QtConcurrent/QtConcurrent>
+#include "../libqtavi/QAviWriter.h"
 
 QImage frameImage[4];
 bool frameImageReady[4] = {false, false, false, false};
@@ -16,7 +19,7 @@ bool frameRecording = false;
 bool needToFFMPEG = false;
 int uvc_instance = 0;
 int uvc_start_number[4] = {0, 1, 2, 3};
-int ocv_instance = 2;
+int ocv_instance = 0;
 int ocv_start_number[4] = {0, 1, 2, 3};
 int ocv_streaming[4] = {1, 1, 1, 1};
 QMutex gQmutex;
@@ -42,12 +45,17 @@ inline long millis(timeval start, timeval end)
     return ((seconds) * 1000 + useconds/1000.0) + 0.5;
 }
 
+void saveThisQImage(QImage image, QString filename){
+    image.save(filename, nullptr, 60);
+}
+
 void SaveVidFramesThread::run()
 {
 #if CPP_FFMPEG_RECORD
     ffmpeg_init();
 #endif
     char filename[100];
+    char videoName[150];
     struct timeval now, previous;
     double real_averaged_fps = 0;
     double instant_fps = 0;
@@ -56,12 +64,18 @@ void SaveVidFramesThread::run()
     int videoNumber = 0;
     bool tempics_dir_not_created = true;
     gettimeofday(&previous, nullptr);
-    QImage combinedImage = QImage(640, 1024, !frameImage[0].isNull()?frameImage[0].format():QImage::Format_ARGB32);
+    combinedImage = QImage(640, 1024, !frameImage[0].isNull()?frameImage[0].format():QImage::Format_ARGB32);
     QPainter painter(&combinedImage);
-    QTransform rotating;//, rotatingM90, rotatingP90;
-    rotating.rotate(180);//    rotatingM90.rotate(-90);//    rotatingP90.rotate(90);
+    QTransform rotating, scaling, rotatingM90, rotatingP90;
+    rotating.rotate(180);//
+    rotatingM90.rotate(-90);//    rotatingP90.rotate(90);
+    scaling.scale(0.3, 0.3);
+    painter.setCompositionMode(QPainter::CompositionMode_Source);
+    sprintf(videoName, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
+    qDebug() << "\n\n\n\nvideoName = " << videoName;
+    QAviWriter writer(videoName, combinedImage.size());
     while(true){
-        usleep(1000); //1 millisecond so that this thread doesn't check value of RecordVideo 100% of the time, reducing cpu usage
+        usleep(100); //0.1 millisecond so that this thread doesn't check value of RecordVideo 100% of the time, reducing cpu usage
         if(RecordVideo){
             if(tempics_dir_not_created){
                 char mkdir_tempics[150];
@@ -70,6 +84,7 @@ void SaveVidFramesThread::run()
                 system(mkdir_tempics);
                 tempics_dir_not_created = false;
             }
+            if(!writer.isOpened()) writer.open();
             if(frameImageReady[0] && frameImageReady[1] && !frameImageSaved[0] && !frameImageSaved[1]){
                 if(frameImageNumber <= startFrameNo){
                     gettimeofday(&now, nullptr);
@@ -80,17 +95,18 @@ void SaveVidFramesThread::run()
                 sprintf(filename, "/media/pi/VUIR_DATA/%s/tempics/frame_%06d.jpg", sub_folder_name, frameImageNumber++);
                 if(!frameImage[0].isNull() && !frameImage[1].isNull())
                 {
-                    painter.setCompositionMode(QPainter::CompositionMode_Source);
                     painter.drawImage(0, 0, frameImage[0].transformed(rotating));//rotatingM90));
-                    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-                    painter.drawImage(0, 512, frameImage[1]);//.transformed(rotatingP90));
+                    painter.drawImage(0, 512, frameImage[1]);//.transformed(scaling));//.transformed(rotatingP90));
                     frameImageSaved[0] = true;
                     frameImageSaved[1] = true;
                     frameImageReady[0] = false;
                     frameImageReady[1] = false;
                     if(!combinedImage.isNull()) {
                         //qDebug() << "SAVING combined Image!" << filename;
-                        combinedImage.save(filename, nullptr, 60);
+                        //combinedImage.transformed(rotatingM90).save(filename, nullptr, 60);
+                        //combinedImage.save(filename, nullptr, 60);
+                        //QtConcurrent::run(saveThisQImage, combinedImage, QString(filename));
+                        writer.addFrame(combinedImage);
                     }
                 }
                 if(frameImageNumber%60 == 0){ //Todo change this to 60 if use full60fps_VuIRThermal
@@ -99,11 +115,11 @@ void SaveVidFramesThread::run()
                     instant_fps = 60000.0/millis(previous, now); //Todo change this to 60000.0 if use full60fps_VuIRThermal
                     real_averaged_fps += instant_fps;
                     counter++;
-                    qDebug() << "real time FPS = " << instant_fps;
+                    qDebug() << "real time FPS for vid recording = " << instant_fps;
                 }
             }
-            if(!needToFFMPEG) needToFFMPEG = true;
-            usleep(10000); //10 millisecond
+            //if(!needToFFMPEG) needToFFMPEG = true;
+            //usleep(10000); //10 millisecond
         } else {
 #ifdef QTVIDRECORD
             if(mRecorder && (mRecorder->state() == QMediaRecorder::RecordingState)){
@@ -111,6 +127,8 @@ void SaveVidFramesThread::run()
                 qDebug() << "mRecorder->stop();";
             }
 #endif
+            if(writer.isOpened()) writer.close();
+
             if(needToFFMPEG){                
                 needToFFMPEG = false;
 #if CPP_FFMPEG_RECORD
@@ -146,6 +164,8 @@ void SaveVidFramesThread::run()
                            << "fastdecode"
                            << "-b:v"
                            << "300M"
+                           //<< "-vf"  //this option is for rotating the video -90 degrees
+                           //<< "transpose=2"
                            << videoNameArg;
                 //-b:v 300M is a large number, but it's probably ignored. It's just there to set no limit to the bitrate
                 //-vcodec libx264 -crf 24 -preset veryfast  -b:v 600M
