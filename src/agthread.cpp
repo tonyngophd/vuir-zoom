@@ -5,6 +5,7 @@
 int NumberOfCameras = 0;
 char Boson_SN[4][6];
 uint32_t cameraSN[4];
+int typeOfGimmera = 2;
 
 void Set_Zoom_Limits(){
     for(int i = 0; i < NumberOfCameras; i++){
@@ -37,6 +38,17 @@ void Sort_Cameras_Per_FOV_And_Assign_SNs_To_UVCs(uint32_t SN[4], int FOV[4], boo
     for(int i = 0; i < NumberOfCameras; i++){
         sprintf(Boson_SN[i], "%d", SN[i]);
         printf("Camera SN = %d, Boson_SN[%d] = %s\n", SN[i], i, Boson_SN[i]);
+    }
+    switch(NumberOfCameras){
+    case 2:
+        if(FOV[0] == FOV[1]) typeOfGimmera = 21;
+        break;
+    case 4:
+        if((FOV[0] == FOV[1])&&(FOV[1] == FOV[2])&&(FOV[2] == FOV[3])) typeOfGimmera = 41;
+        break;
+    default:
+        typeOfGimmera = NumberOfCameras;
+        break;
     }
 }
 

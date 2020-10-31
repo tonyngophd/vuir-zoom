@@ -16,5 +16,9 @@ extern bool needToSwapViews;
 extern int NumberOfCameras;
 extern char Boson_SN[4][6];
 extern uint32_t cameraSN[4];
+//1: normal one boson, 2: normal two bosons not same FOVs,
+//3: normal 3 bosons not same FOVs, 4: normal 4 boson not same FOVs: Mainly for optical zoom
+//21: 2 bosons with same FOVs, 41: 4 bosons same FOVs, 61: 6 bosons same FOVs: for having more pixels (1024x640, 1280x1024, 1920x1024...)
+extern int typeOfGimmera;
 
 #endif // GLOBALVARIABLES_H

@@ -266,7 +266,7 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
             globalVideoViewOrderNo = mainViewNumber;
             scalerSetZoom(ZoomParams);
 
-            if(mainViewNumber != mainViewNumber_pre){
+            if(mainViewNumber != mainViewNumber_pre && typeOfGimmera < 10){
                 ocv_streaming[mainViewNumber] = 1;                
                 /*if(mainViewNumber == 0) {ocv_streaming[1] = 1; ocv_streaming[2] = 0; ocv_streaming[3] = 0;}
                 else if(mainViewNumber == 1) {ocv_streaming[2] = 1; ocv_streaming[3] = 0; ocv_streaming[0] = 0;}
@@ -301,7 +301,7 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
         RecordVideo = !RecordVideo;//(Value != 0);
         StopVideoRecording = !RecordVideo;
         //cout << "in ag_aux_funcs StartRecordVideo = " << RecordVideo << "Value = " << Value << endl;
-        cout << "sub_folder_name =" << sub_folder_name << endl;
+        //cout << "sub_folder_name =" << sub_folder_name << endl;
         break;
 
       case SELECT_CAM_CHANNEL:
@@ -313,8 +313,7 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
         globalVideoViewOrderNo = mainViewNumber;
         qDebug() << "mainViewNumber = " << mainViewNumber;
         //scalerSetZoom(ZoomParams);
-
-        //if(mainViewNumber != mainViewNumber_pre){
+        if(typeOfGimmera < 10){
             ocv_streaming[mainViewNumber] = 1;
             /*if(mainViewNumber == 0) {ocv_streaming[1] = 1; ocv_streaming[2] = 0; ocv_streaming[3] = 0;}
             else if(mainViewNumber == 1) {ocv_streaming[2] = 1; ocv_streaming[3] = 0; ocv_streaming[0] = 0;}
@@ -325,8 +324,7 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
             needToSwapViews = true;
             mainViewNo = mainViewNumber;
             qml_Swapviews();
-        //}
-
+        }
         break;
 
       case YEAR_CHANNEL:
