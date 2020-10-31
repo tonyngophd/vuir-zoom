@@ -5,8 +5,6 @@
 
 extern bool frameImageReady[4];
 extern bool frameImageSaved[4];
-extern int frameImageNumber;
-extern char frameImageFileName[100];
 extern bool frameRecording;
 extern bool SaveAPicture;
 extern bool RecordVideo;

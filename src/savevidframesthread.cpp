@@ -8,13 +8,10 @@
 #include <QPoint>
 #include <QThreadPool>
 #include <QtConcurrent/QtConcurrent>
-#include "../libqtavi/QAviWriter.h"
 
 QImage frameImage[4];
 bool frameImageReady[4] = {false, false, false, false};
 bool frameImageSaved[4] = {true, true, true, true};
-int frameImageNumber = 0;
-char frameImageFileName[100];
 bool frameRecording = false;
 bool needToFFMPEG = false;
 int uvc_instance = 0;
@@ -49,6 +46,10 @@ void saveThisQImage(QImage image, QString filename){
     image.save(filename, nullptr, 60);
 }
 
+void SaveVidFramesThread::addFrameThreadFunc(int quality){
+    writer.addFrame(combinedImage, "JPG", quality);
+}
+
 void SaveVidFramesThread::run()
 {
 #if CPP_FFMPEG_RECORD
@@ -71,20 +72,24 @@ void SaveVidFramesThread::run()
     rotatingM90.rotate(-90);//    rotatingP90.rotate(90);
     scaling.scale(0.3, 0.3);
     painter.setCompositionMode(QPainter::CompositionMode_Source);
-    sprintf(videoName, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
-    qDebug() << "\n\n\n\nvideoName = " << videoName;
-    QAviWriter writer(videoName, combinedImage.size());
+
     while(true){
         usleep(100); //0.1 millisecond so that this thread doesn't check value of RecordVideo 100% of the time, reducing cpu usage
         if(RecordVideo){
-            if(tempics_dir_not_created){
+            /*if(tempics_dir_not_created){
                 char mkdir_tempics[150];
                 sprintf(mkdir_tempics, "mkdir -p /media/pi/VUIR_DATA/%s/tempics", sub_folder_name);
                 qDebug() << mkdir_tempics;
                 system(mkdir_tempics);
                 tempics_dir_not_created = false;
+            }*/
+            if(!writer.isOpened()) {
+                sprintf(videoName, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
+                qDebug() << "\n\n\n\nvideoName = " << videoName;
+                writer.open(videoName, combinedImage.size());
+                gettimeofday(&now, nullptr);
+                frameImageNumber = 0;
             }
-            if(!writer.isOpened()) writer.open();
             if(frameImageReady[0] && frameImageReady[1] && !frameImageSaved[0] && !frameImageSaved[1]){
                 if(frameImageNumber <= startFrameNo){
                     gettimeofday(&now, nullptr);
@@ -92,7 +97,6 @@ void SaveVidFramesThread::run()
                     uint16_t counter = 0;
                     frameImageNumber = startFrameNo;
                 }
-                sprintf(filename, "/media/pi/VUIR_DATA/%s/tempics/frame_%06d.jpg", sub_folder_name, frameImageNumber++);
                 if(!frameImage[0].isNull() && !frameImage[1].isNull())
                 {
                     painter.drawImage(0, 0, frameImage[0].transformed(rotating));//rotatingM90));
@@ -102,11 +106,10 @@ void SaveVidFramesThread::run()
                     frameImageReady[0] = false;
                     frameImageReady[1] = false;
                     if(!combinedImage.isNull()) {
-                        //qDebug() << "SAVING combined Image!" << filename;
-                        //combinedImage.transformed(rotatingM90).save(filename, nullptr, 60);
-                        //combinedImage.save(filename, nullptr, 60);
-                        //QtConcurrent::run(saveThisQImage, combinedImage, QString(filename));
-                        writer.addFrame(combinedImage);
+                        frameImageNumber++;
+                        //sprintf(filename, "/media/pi/VUIR_DATA/%s/tempics/frame_%06d.jpg", sub_folder_name, frameImageNumber++);
+                        //QtConcurrent::run(saveThisQImage, combinedImage, QString(filename)); //this WORKS
+                        QtConcurrent::run(this, &SaveVidFramesThread::addFrameThreadFunc, 40);//writer.addFrame(combinedImage, "JPG", 40);
                     }
                 }
                 if(frameImageNumber%60 == 0){ //Todo change this to 60 if use full60fps_VuIRThermal
@@ -119,7 +122,7 @@ void SaveVidFramesThread::run()
                 }
             }
             //if(!needToFFMPEG) needToFFMPEG = true;
-            //usleep(10000); //10 millisecond
+            usleep(1); //1 microsecond
         } else {
 #ifdef QTVIDRECORD
             if(mRecorder && (mRecorder->state() == QMediaRecorder::RecordingState)){
