@@ -122,12 +122,12 @@ void SaveVidFramesThread::run()
                     frameImageNumber = startFrameNo;
                 }
                 if(allAreNotNull()){
-                    painter.setCompositionMode(QPainter::CompositionMode_Source);
+//                    painter.setCompositionMode(QPainter::CompositionMode_Source);
                     painter.drawImage(220, 0, frameImage[globalVideoViewOrderNo]);//.transformed(rotating));//rotatingM90));
                     for (int i = 0; i < NumberOfCameras; i++) {
                         if(Video_View_Matrix[i] == globalVideoViewOrderNo) continue;
-                        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-                        painter.drawImage(0, (Video_View_Matrix[i] - 1) * 171, frameImage[Video_View_Matrix[i]].transformed(scaling));//.transformed(rotatingP90));
+//                        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+                        painter.drawImage(0, (i - 1) * 171, frameImage[Video_View_Matrix[i]].transformed(scaling));//.transformed(rotatingP90));
                     }
                     resetFlags();
                     if(!combinedImage.isNull()) {

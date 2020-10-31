@@ -52,6 +52,9 @@ void Cycle_Video_Views(int newMainViewNumber){
     for(int i = 0; i < newMainViewNumber; i++){
         Video_View_Matrix[i] = NumberOfCameras + (i - newMainViewNumber);
     }
+    for(int i = 0; i < NumberOfCameras; i++){
+        cout << "Video_View_Matrix[" << i << "] = " << Video_View_Matrix[i] << " newMainViewNumber = " << newMainViewNumber << endl;
+    }
 }
 
 void Cycle_Video_Views(int newMainViewNumber, int nc){
@@ -265,6 +268,7 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
 
             globalVideoViewOrderNo = mainViewNumber;
             scalerSetZoom(ZoomParams);
+            Cycle_Video_Views(mainViewNumber);
 
             if(mainViewNumber != mainViewNumber_pre && typeOfGimmera < 10){
                 ocv_streaming[mainViewNumber] = 1;                
@@ -313,6 +317,7 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
         globalVideoViewOrderNo = mainViewNumber;
         qDebug() << "mainViewNumber = " << mainViewNumber;
         //scalerSetZoom(ZoomParams);
+        Cycle_Video_Views(mainViewNumber);
         if(typeOfGimmera < 10){
             ocv_streaming[mainViewNumber] = 1;
             /*if(mainViewNumber == 0) {ocv_streaming[1] = 1; ocv_streaming[2] = 0; ocv_streaming[3] = 0;}
