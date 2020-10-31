@@ -3,6 +3,7 @@
 #include "globalforclassvariables.h"
 #include "ffmpgegvideorecorder.h"
 #include "videoviewscontroller.h"
+#include "globalflirvariables.h"
 #include <QUrl>
 #include <QPainter>
 #include <QPoint>
@@ -50,6 +51,29 @@ void SaveVidFramesThread::addFrameThreadFunc(int quality){
     writer.addFrame(combinedImage, "JPG", quality);
 }
 
+bool allAreReady(int max = NumberOfCameras){
+    bool result = true;
+    for(int i = 0; i < max; i++){
+        result = result && frameImageReady[i] && !frameImageSaved[i];
+    }
+    return result;
+}
+
+bool allAreNotNull(int max = NumberOfCameras){
+    bool result = true;
+    for(int i = 0; i < max; i++){
+        result = result && !frameImage[i].isNull();
+    }
+    return result;
+}
+
+void resetFlags(int max = NumberOfCameras){
+    for(int i = 0; i < max; i++){
+        frameImageSaved[i] = true;
+        frameImageReady[i] = false;
+    }
+}
+
 void SaveVidFramesThread::run()
 {
 #if CPP_FFMPEG_RECORD
@@ -65,12 +89,12 @@ void SaveVidFramesThread::run()
     int videoNumber = 0;
     bool tempics_dir_not_created = true;
     gettimeofday(&previous, nullptr);
-    combinedImage = QImage(640, 1024, !frameImage[0].isNull()?frameImage[0].format():QImage::Format_ARGB32);
+    combinedImage = QImage(640 + 220, 512, !frameImage[0].isNull()?frameImage[0].format():QImage::Format_ARGB32);
     QPainter painter(&combinedImage);
     QTransform rotating, scaling, rotatingM90, rotatingP90;
     rotating.rotate(180);//
     rotatingM90.rotate(-90);//    rotatingP90.rotate(90);
-    scaling.scale(0.3, 0.3);
+    scaling.scale(0.34375, 0.34375);
     painter.setCompositionMode(QPainter::CompositionMode_Source);
 
     while(true){
@@ -90,21 +114,22 @@ void SaveVidFramesThread::run()
                 gettimeofday(&now, nullptr);
                 frameImageNumber = 0;
             }
-            if(frameImageReady[0] && frameImageReady[1] && !frameImageSaved[0] && !frameImageSaved[1]){
+            if(allAreReady()){
                 if(frameImageNumber <= startFrameNo){
                     gettimeofday(&now, nullptr);
                     uint32_t real_averaged_fps = 0;
                     uint16_t counter = 0;
                     frameImageNumber = startFrameNo;
                 }
-                if(!frameImage[0].isNull() && !frameImage[1].isNull())
-                {
-                    painter.drawImage(0, 0, frameImage[0].transformed(rotating));//rotatingM90));
-                    painter.drawImage(0, 512, frameImage[1]);//.transformed(scaling));//.transformed(rotatingP90));
-                    frameImageSaved[0] = true;
-                    frameImageSaved[1] = true;
-                    frameImageReady[0] = false;
-                    frameImageReady[1] = false;
+                if(allAreNotNull()){
+                    painter.setCompositionMode(QPainter::CompositionMode_Source);
+                    painter.drawImage(220, 0, frameImage[globalVideoViewOrderNo]);//.transformed(rotating));//rotatingM90));
+                    for (int i = 0; i < NumberOfCameras; i++) {
+                        if(Video_View_Matrix[i] == globalVideoViewOrderNo) continue;
+                        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+                        painter.drawImage(0, (Video_View_Matrix[i] - 1) * 171, frameImage[Video_View_Matrix[i]].transformed(scaling));//.transformed(rotatingP90));
+                    }
+                    resetFlags();
                     if(!combinedImage.isNull()) {
                         frameImageNumber++;
                         //sprintf(filename, "/media/pi/VUIR_DATA/%s/tempics/frame_%06d.jpg", sub_folder_name, frameImageNumber++);

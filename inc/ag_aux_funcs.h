@@ -144,7 +144,6 @@ void setupI2C();
 extern FLR_COLORLUT_ID_E Palette;
 extern int Cams_Value_Limit[6];
 extern int Cams_DigiZoom_Limit[6];
-extern int Video_View_Matrix[6];
 extern int fdI2C;
 
 
