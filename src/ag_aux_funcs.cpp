@@ -548,9 +548,9 @@ std::string get_current_dir_slash() {
 
 
 void FolderTasks(uint16_t BosonResolution0){
-    char main_folder_name[30] = "/media/pi/VUIR_DATA";  // To store the main folder name
+    char main_folder_name[30] = "/mnt/suascom/VUIR_DATA";// "/media/pi/VUIR_DATA";  // To store the main folder name
     //char sub_folder_name[30];  // To store the sub folder name
-    //mkdir(main_folder_name, 0777); //0700
+    if(strstr(main_folder_name, "suascom")) mkdir(main_folder_name, 0777); //0700 //Only if /mnt/suascom. DISABLE THIS FOR /media/pi
     printf(WHT "chdir(main_folder_name) result %d\n", chdir(main_folder_name));
     printf(WHT ">>> Folder " YEL "%s" WHT " selected as main folder\n", main_folder_name);
     char format[] = "VuIR%Y%b%d_%H%M";

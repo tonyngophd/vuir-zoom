@@ -407,7 +407,8 @@ void UvcAcquisition::emitRearangeVideoViewsSignal(int mainViewNo){
 void UvcAcquisition::savepictures(const QVideoFrame &frame){
     if(SaveAPicture){         
         char fileName[150];
-        sprintf(fileName, "/media/pi/VUIR_DATA/%s/VuIRBoson%01d_%03d.jpg", sub_folder_name, _camera_number, _pictureNo++);
+        //sprintf(fileName, "/media/pi/VUIR_DATA/%s/VuIRBoson%01d_%03d.jpg", sub_folder_name, _camera_number, _pictureNo++);
+        sprintf(fileName, "/mnt/suascom/VUIR_DATA/%s/VuIRBoson%01d_%03d.jpg", sub_folder_name, _camera_number, _pictureNo++);
         //"/mnt/suascom/VuIRBoson%02d_%1.jpg"
         qt_imageFromVideoFrame(frame).save(fileName, 0, 100);
         SaveAPicture = false;

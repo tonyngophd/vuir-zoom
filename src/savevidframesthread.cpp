@@ -101,8 +101,8 @@ void SaveVidFramesThread::run()
                     painter.begin(&combinedImage);
                     painter.setCompositionMode(QPainter::CompositionMode_Source);
                 }
-
-                sprintf(videoName, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
+                sprintf(videoName, "/mnt/suascom/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
+                //sprintf(videoName, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
                 qDebug() << "\n\nvideoName = " << videoName;
                 videoWriter.open(videoName, combinedImage.size());
                 gettimeofday(&now, nullptr);
