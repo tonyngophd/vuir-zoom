@@ -121,6 +121,12 @@ void SaveVidFramesThread::run()
                     counter++;
                     qDebug() << "real time FPS for vid recording = " << instant_fps;
                 }
+                if(frameImageNumber >= 1800*10){ // We somewhat arbitrarily limit the length of video to be 10 minutes (30fps * 60s * 10 = 1800 * 10 frames).
+                    //The expected file size is then about 60MB * 10 = 600MB
+                    qDebug() << "Video file size/length limit reached, closing writer and starting a new file";
+                    if(videoWriter.isOpened()) videoWriter.close();
+                    frameImageNumber = 0;
+                }
             }
             usleep(1); //1 microsecond
         } else {
