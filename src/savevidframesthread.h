@@ -18,7 +18,7 @@ public:
 private:
     QImage combinedImage;
     int *fileNo;
-    QAviWriter writer;
+    QAviWriter videoWriter;
     int frameImageNumber = 0;
 
 protected:

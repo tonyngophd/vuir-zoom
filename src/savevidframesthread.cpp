@@ -43,12 +43,8 @@ inline long millis(timeval start, timeval end)
     return ((seconds) * 1000 + useconds/1000.0) + 0.5;
 }
 
-void saveThisQImage(QImage image, QString filename){
-    image.save(filename, nullptr, 60);
-}
-
 void SaveVidFramesThread::addFrameThreadFunc(int quality){
-    writer.addFrame(combinedImage, "JPG", quality);
+    videoWriter.addFrame(combinedImage, "JPG", quality);
 }
 
 bool allAreReady(int max = NumberOfCameras){
@@ -87,30 +83,20 @@ void SaveVidFramesThread::run()
     uint16_t counter = 0;
     uint32_t startFrameNo = 0;
     int videoNumber = 0;
-    bool tempics_dir_not_created = true;
     gettimeofday(&previous, nullptr);
     combinedImage = QImage(640 + 220, 512, !frameImage[0].isNull()?frameImage[0].format():QImage::Format_ARGB32);
     QPainter painter(&combinedImage);
-    QTransform rotating, scaling, rotatingM90, rotatingP90;
-    rotating.rotate(180);//
-    rotatingM90.rotate(-90);//    rotatingP90.rotate(90);
+    QTransform scaling;
     scaling.scale(0.34375, 0.34375);
     painter.setCompositionMode(QPainter::CompositionMode_Source);
 
     while(true){
         usleep(100); //0.1 millisecond so that this thread doesn't check value of RecordVideo 100% of the time, reducing cpu usage
         if(RecordVideo){
-            /*if(tempics_dir_not_created){
-                char mkdir_tempics[150];
-                sprintf(mkdir_tempics, "mkdir -p /media/pi/VUIR_DATA/%s/tempics", sub_folder_name);
-                qDebug() << mkdir_tempics;
-                system(mkdir_tempics);
-                tempics_dir_not_created = false;
-            }*/
-            if(!writer.isOpened()) {
+            if(!videoWriter.isOpened()) {
                 sprintf(videoName, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
                 qDebug() << "\n\n\n\nvideoName = " << videoName;
-                writer.open(videoName, combinedImage.size());
+                videoWriter.open(videoName, combinedImage.size());
                 gettimeofday(&now, nullptr);
                 frameImageNumber = 0;
             }
@@ -122,19 +108,15 @@ void SaveVidFramesThread::run()
                     frameImageNumber = startFrameNo;
                 }
                 if(allAreNotNull()){
-//                    painter.setCompositionMode(QPainter::CompositionMode_Source);
-                    painter.drawImage(220, 0, frameImage[globalVideoViewOrderNo]);//.transformed(rotating));//rotatingM90));
-                    for (int i = 0; i < NumberOfCameras; i++) {
-                        if(Video_View_Matrix[i] == globalVideoViewOrderNo) continue;
-//                        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-                        painter.drawImage(0, (i - 1) * 171, frameImage[Video_View_Matrix[i]].transformed(scaling));//.transformed(rotatingP90));
+                    painter.drawImage(220, 0, frameImage[globalVideoViewOrderNo]);
+                    for (int i = 1; i < NumberOfCameras; i++) {
+                        painter.drawImage(0, (i - 1) * 171, frameImage[Video_View_Matrix[i]].transformed(scaling));
                     }
                     resetFlags();
                     if(!combinedImage.isNull()) {
                         frameImageNumber++;
                         //sprintf(filename, "/media/pi/VUIR_DATA/%s/tempics/frame_%06d.jpg", sub_folder_name, frameImageNumber++);
-                        //QtConcurrent::run(saveThisQImage, combinedImage, QString(filename)); //this WORKS
-                        QtConcurrent::run(this, &SaveVidFramesThread::addFrameThreadFunc, 40);//writer.addFrame(combinedImage, "JPG", 40);
+                        QtConcurrent::run(this, &SaveVidFramesThread::addFrameThreadFunc, 40);//videoWriter.addFrame(combinedImage, "JPG", 40);
                     }
                 }
                 if(frameImageNumber%60 == 0){ //Todo change this to 60 if use full60fps_VuIRThermal
@@ -155,7 +137,7 @@ void SaveVidFramesThread::run()
                 qDebug() << "mRecorder->stop();";
             }
 #endif
-            if(writer.isOpened()) writer.close();
+            if(videoWriter.isOpened()) videoWriter.close();
 
             if(needToFFMPEG){                
                 needToFFMPEG = false;
