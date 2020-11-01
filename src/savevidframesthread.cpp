@@ -47,7 +47,7 @@ void SaveVidFramesThread::addFrameThreadFunc(int quality){
     videoWriter.addFrame(combinedImage, "JPG", quality);
 }
 
-bool allAreReady(int max = NumberOfCameras){
+bool SaveVidFramesThread::allAreReady(int max = NumberOfCameras){
     bool result = true;
     for(int i = 0; i < max; i++){
         result = result && frameImageReady[i] && !frameImageSaved[i];
@@ -55,7 +55,7 @@ bool allAreReady(int max = NumberOfCameras){
     return result;
 }
 
-bool allAreNotNull(int max = NumberOfCameras){
+bool SaveVidFramesThread::allAreNotNull(int max = NumberOfCameras){
     bool result = true;
     for(int i = 0; i < max; i++){
         result = result && !frameImage[i].isNull();
@@ -63,7 +63,7 @@ bool allAreNotNull(int max = NumberOfCameras){
     return result;
 }
 
-void resetFlags(int max = NumberOfCameras){
+void SaveVidFramesThread::resetFlags(int max = NumberOfCameras){
     for(int i = 0; i < max; i++){
         frameImageSaved[i] = true;
         frameImageReady[i] = false;
@@ -72,10 +72,6 @@ void resetFlags(int max = NumberOfCameras){
 
 void SaveVidFramesThread::run()
 {
-#if CPP_FFMPEG_RECORD
-    ffmpeg_init();
-#endif
-    char filename[100];
     char videoName[150];
     struct timeval now, previous;
     double real_averaged_fps = 0;
@@ -91,7 +87,6 @@ void SaveVidFramesThread::run()
     painter.setCompositionMode(QPainter::CompositionMode_Source);
 
     while(true){
-        usleep(100); //0.1 millisecond so that this thread doesn't check value of RecordVideo 100% of the time, reducing cpu usage
         if(RecordVideo){
             if(!videoWriter.isOpened()) {
                 sprintf(videoName, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
@@ -115,8 +110,7 @@ void SaveVidFramesThread::run()
                     resetFlags();
                     if(!combinedImage.isNull()) {
                         frameImageNumber++;
-                        //sprintf(filename, "/media/pi/VUIR_DATA/%s/tempics/frame_%06d.jpg", sub_folder_name, frameImageNumber++);
-                        QtConcurrent::run(this, &SaveVidFramesThread::addFrameThreadFunc, 40);//videoWriter.addFrame(combinedImage, "JPG", 40);
+                        QtConcurrent::run(this, &SaveVidFramesThread::addFrameThreadFunc, 40);
                     }
                 }
                 if(frameImageNumber%60 == 0){ //Todo change this to 60 if use full60fps_VuIRThermal
@@ -128,75 +122,11 @@ void SaveVidFramesThread::run()
                     qDebug() << "real time FPS for vid recording = " << instant_fps;
                 }
             }
-            //if(!needToFFMPEG) needToFFMPEG = true;
             usleep(1); //1 microsecond
         } else {
-#ifdef QTVIDRECORD
-            if(mRecorder && (mRecorder->state() == QMediaRecorder::RecordingState)){
-                mRecorder->stop();
-                qDebug() << "mRecorder->stop();";
-            }
-#endif
             if(videoWriter.isOpened()) videoWriter.close();
-
-            if(needToFFMPEG){                
-                needToFFMPEG = false;
-#if CPP_FFMPEG_RECORD
-                ffmpeg_finalize();
-#elif QIMAGERECORD
-                real_averaged_fps /= counter;
-                QProcess _FFMPEG;
-                QString _process = "ffmpeg";
-                QStringList _paramList;
-                char videoNameArg[150];
-                char picname[150];
-                sprintf(videoNameArg, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
-                sprintf(picname, "/media/pi/VUIR_DATA/%s/tempics/frame_%%06d.jpg", sub_folder_name);
-                //sprintf(videoNameArg, "VuIRBoson%02d_%03d.avi", videoNumber++);
-                _paramList << "-y"
-                           << "-framerate"
-                           << QString::number(real_averaged_fps)
-                           << "-start_number"
-                           << QString::number(startFrameNo)
-                           << "-i"
-                           //<< "/media/pi/VUIR_DATA/tempics/frame_%06d.jpg"
-                           << picname
-                           //<< "tempics/frame_%06d.jpg"
-                           << "-vframes"
-                           << QString::number(frameImageNumber-1 - startFrameNo)
-                           << "-vcodec"
-                           << "libx264"
-                           << "-crf"
-                           << "20"
-                           << "-preset"
-                           << "ultrafast"
-                           << "-tune"
-                           << "fastdecode"
-                           << "-b:v"
-                           << "300M"
-                           //<< "-vf"  //this option is for rotating the video -90 degrees
-                           //<< "transpose=2"
-                           << videoNameArg;
-                //-b:v 300M is a large number, but it's probably ignored. It's just there to set no limit to the bitrate
-                //-vcodec libx264 -crf 24 -preset veryfast  -b:v 600M
-                //ffmpeg -r 27.51 -i /mnt/suascom/tempics/good/frame_%05d.jpg -vcodec libx264 -crf 24 -preset veryfast  -b:v 600M /mnt/suascom/tempics/good/fast24.avi
-                ////https://trac.ffmpeg.org/wiki/Encode/H.264
-                //[libx264 @ 0x2bb2580] Possible presets: ultrafast superfast veryfast faster fast medium slow slower veryslow placebo
-                //[libx264 @ 0x2bb2580] Possible tunes: film animation grain stillimage psnr ssim fastdecode zerolatency
-                qDebug() << _process << _paramList;
-                //_FFMPEG.start(_process, _paramList);
-                _FFMPEG.startDetached(_process, _paramList);
-
-                /*if ( !(_FFMPEG.waitForFinished()) )
-                    qDebug() << "Conversion failed:" << _FFMPEG.errorString();
-                else
-                    qDebug() << "Conversion output:" << _FFMPEG.readAll();*/
-                if(startFrameNo < frameImageNumber){
-                    startFrameNo = (frameImageNumber-1) +50; //Remember frameImageNumber++ in sprintf(filename, "/media/pi/VUIR_DATA/tempics/frame_%06d.jpg", frameImageNumber++);
-                }
-#endif
-            }
             usleep(100000); //100 milliseconds or 1/10 a second
         }
+        usleep(100); //0.1 millisecond so that this thread doesn't check value of RecordVideo 100% of the time, reducing cpu usage
     }
 }

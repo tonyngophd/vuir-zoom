@@ -21,6 +21,10 @@ private:
     QAviWriter videoWriter;
     int frameImageNumber = 0;
 
+    bool allAreReady(int);
+    bool allAreNotNull(int);
+    void resetFlags(int);
+
 protected:
     void run();
 };
