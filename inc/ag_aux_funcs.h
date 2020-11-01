@@ -94,6 +94,7 @@ using namespace std::chrono;
 #define MINUTE_CHANNEL 99
 #define SECOND_CHANNEL 100
 #define SELECT_CAM_CHANNEL 101
+#define GIM_VIDQUAL_CHANNEL 102
 
 #define RECBUTTON_ID 100
 #define RECTEXT_ID (RECBUTTON_ID + 1)

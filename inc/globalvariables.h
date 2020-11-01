@@ -17,6 +17,7 @@ extern int NumberOfCameras;
 extern char Boson_SN[4][6];
 extern uint32_t cameraSN[4];
 extern int Video_View_Matrix[6];
+extern int video_save_quality;
 
 //1: normal one boson, 2: normal two bosons not same FOVs,
 //3: normal 3 bosons not same FOVs, 4: normal 4 boson not same FOVs: Mainly for optical zoom

@@ -23,6 +23,7 @@ int ocv_streaming[4] = {1, 1, 1, 1};
 QMutex gQmutex;
 int mainViewNo = 0;
 bool needToSwapViews = false;
+int video_save_quality = 40;
 
 QImage qt_imageFromVideoFrame(const QVideoFrame& f);
 
@@ -90,6 +91,7 @@ void SaveVidFramesThread::run()
     while(true){
         if(RecordVideo){
             if(!videoWriter.isOpened()) {
+                qDebug() << "Video save quality = " << video_save_quality;
                 QSize qSize(640, 1024);
                 if(typeOfGimmera < 10){
                     qSize.setWidth(640 + 220);
@@ -128,7 +130,7 @@ void SaveVidFramesThread::run()
                     resetFlags();
                     if(!combinedImage.isNull()) {
                         frameImageNumber++;
-                        QtConcurrent::run(this, &SaveVidFramesThread::addFrameThreadFunc, 40);
+                        QtConcurrent::run(this, &SaveVidFramesThread::addFrameThreadFunc, 40);//video_save_quality);
                     }
                 }
                 if(frameImageNumber%60 == 0){ //Todo change this to 60 if use full60fps_VuIRThermal

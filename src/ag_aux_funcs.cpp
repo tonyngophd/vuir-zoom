@@ -329,7 +329,10 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
             qml_Swapviews();
         }
         break;
-
+      case GIM_VIDQUAL_CHANNEL:
+        video_save_quality = Value;
+        qDebug() << "Video save quality = " << video_save_quality;
+        break;
       case YEAR_CHANNEL:
         yy = Value + 2000;
         break;
@@ -363,12 +366,12 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
             FolderTasks(BosonResolution[0]);
         }
         break;
-      case BATTERY_MESSAGE_CHANNEL:
-        //VG = GimmeraBatteryVoltage();
-        //sendmessage(VG, BATTERY_MESSAGE_CHANNEL);
-        break;
-      case IR2D_CHANNEL:
-        break;
+//      case BATTERY_MESSAGE_CHANNEL:
+//        //VG = GimmeraBatteryVoltage();
+//        //sendmessage(VG, BATTERY_MESSAGE_CHANNEL);
+//        break;
+//      case IR2D_CHANNEL:
+//        break;
     }
   }
 }
