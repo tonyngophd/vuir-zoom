@@ -28,6 +28,7 @@ ApplicationWindow {
     property alias callCPPFunctionsFromQML: callCPPFunctionsFromQML
     property alias timer: timer
     property int total_uvc_openings: 2;
+    property int typeOfGimmera: 2;
 
     CallCPPFunctionsFromQML {
         id: callCPPFunctionsFromQML
@@ -43,7 +44,10 @@ ApplicationWindow {
     Component.onCompleted: {
         numberOfCameras = callCPPFunctionsFromQML.number_of_Cameras();
         callCPPFunctionsFromQML.confirm_camera_number_received(numberOfCameras);
-        console.log("\n\nNumber of Cameras got from CPP = ", numberOfCameras, "\n\n");
+        typeOfGimmera = callCPPFunctionsFromQML.type_of_Gimmera();
+        callCPPFunctionsFromQML.confirm_type_of_gimmera_received(typeOfGimmera);
+        console.log("Number of Cameras got from CPP = ", numberOfCameras, "");
+        console.log("Type of Gimmera got from CPP = ", typeOfGimmera, "\n\n");
         component_uvc = Qt.createComponent("videoview.qml");
         mainMargin = (mainWindow.width - mainWindow.height * 8 / 5) / 2;
         // 2560/1600 = 8/5 = 1.6 as tablet resolution. Pi screen resolution is 1280/720 = 16/9 = 1.777777
@@ -55,13 +59,7 @@ ApplicationWindow {
             uvc_component_number = i;
 
             console.log("\nVideoViewObject created = ", videoViewObject[i], "\n\n mainWindow = ", mainWindow);
-            if(i == 0 ){
-                console.log("i = ", i);
-                moveToRightView(i);
-            } else {
-                console.log("i = ", i);
-                moveToLeftView(i); //moveToSideView(i, i);
-            }
+            assignView(i);
         }
         if(total_uvc_openings < numberOfCameras){
             timer.start();
@@ -70,18 +68,23 @@ ApplicationWindow {
                 videoViewObject[i] = component_ocv.createObject(mainWindow);
 
                 console.log("\nOpenCV VideoViewObject created = ", videoViewObject[i], "\n\n mainWindow = ", mainWindow);
-                if(i == 0 ){
-                    console.log("i = ", i);
-                    moveToRightView(i); // moveToMainView(i);
-                } else {
-                    console.log("i = ", i);
-                    moveToLeftView(i); // moveToSideView(i, i);
-                }
+                assignView(i);
                 //timer.start();
             }
         }
-    }
 
+    }
+    function assignView(i){//TODO: this works only for numberOfCameras === 2 (typeOfGimmera === 21). Must do more for 4, 6 (41, 61) casses
+        if(i === 0 ){
+            console.log("i = ", i);
+            if(typeOfGimmera < 10) moveToMainView(i);
+            else moveToRightView(i);
+        } else {
+            console.log("i = ", i);
+            if(typeOfGimmera < 10) moveToSideView(i, i);
+            else moveToLeftView(i);
+        }
+    }
     function moveToLeftView(vn){
         moveView(vn, 90);
     }

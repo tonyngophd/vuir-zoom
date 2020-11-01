@@ -268,7 +268,6 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
 
             globalVideoViewOrderNo = mainViewNumber;
             scalerSetZoom(ZoomParams);
-            Cycle_Video_Views(mainViewNumber);
 
             if(mainViewNumber != mainViewNumber_pre && typeOfGimmera < 10){
                 ocv_streaming[mainViewNumber] = 1;                
@@ -317,7 +316,6 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
         globalVideoViewOrderNo = mainViewNumber;
         qDebug() << "mainViewNumber = " << mainViewNumber;
         //scalerSetZoom(ZoomParams);
-        Cycle_Video_Views(mainViewNumber);
         if(typeOfGimmera < 10){
             ocv_streaming[mainViewNumber] = 1;
             /*if(mainViewNumber == 0) {ocv_streaming[1] = 1; ocv_streaming[2] = 0; ocv_streaming[3] = 0;}
@@ -375,6 +373,40 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
   }
 }
 
+//https://www.raspberrypi.org/forums/viewtopic.php?t=229992
+int cpuPercent()//std::string cpuPercent()
+{
+    static unsigned int lastTotalUser, lastTotalUserLow, lastTotalSys, lastTotalIdle;
+    float percent;
+//    int intPercent;
+//    std::string s;
+
+    FILE* file;
+    unsigned long long totalUser, totalUserLow, totalSys, totalIdle, total;
+
+    file = fopen("/proc/stat", "r");
+    fscanf(file, "cpu %llu %llu %llu %llu", &totalUser, &totalUserLow, &totalSys, &totalIdle);
+    fclose(file);
+
+    if (totalUser < lastTotalUser || totalUserLow < lastTotalUserLow ||
+        totalSys < lastTotalSys || totalIdle < lastTotalIdle)
+    {
+        //Overflow detection. Just skip this value.
+        percent = -1.0;
+    }else{
+        total = (totalUser - lastTotalUser) + (totalUserLow - lastTotalUserLow) + (totalSys - lastTotalSys);
+        percent = total * 100;
+        total += (totalIdle - lastTotalIdle);
+        percent /= total;
+    }
+
+    lastTotalUser    = static_cast<unsigned int>(totalUser);
+    lastTotalUserLow = static_cast<unsigned int>(totalUserLow);
+    lastTotalSys     = static_cast<unsigned int>(totalSys);
+    lastTotalIdle    = static_cast<unsigned int>(totalIdle);
+
+    return static_cast<int>(percent);
+}
 void HD_msg_send(int AG_serial, int BosonResolution0)
 {
     static uint32_t	HBMillis = millis(), VolMillis = millis();
@@ -414,7 +446,7 @@ void HD_msg_send(int AG_serial, int BosonResolution0)
         fscanf(fp, "temp=%d'C", &cpu_temp);
         //printf("CPU temp = %d\n", cpu_temp);
         fclose(fp);
-        sprintf(msg_cpu, "CPT%d\n", cpu_temp);
+        sprintf(msg_cpu, "CPT%d_%d\n", cpu_temp, cpuPercent());
         memcpy(msg, msg_cpu, strlen(msg_cpu) + 1);
         Send_Serial_package(AG_serial, msg, strlen(msg_cpu) + 1);
         usleep(10000);

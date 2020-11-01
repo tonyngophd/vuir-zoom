@@ -80,17 +80,30 @@ void SaveVidFramesThread::run()
     uint32_t startFrameNo = 0;
     int videoNumber = 0;
     gettimeofday(&previous, nullptr);
-    combinedImage = QImage(640 + 220, 512, !frameImage[0].isNull()?frameImage[0].format():QImage::Format_ARGB32);
-    QPainter painter(&combinedImage);
-    QTransform scaling;
+    QPainter painter;
+    QTransform scaling, rotatingM90, rotatingP90, rotating180;
+    rotatingM90.rotate(-90);
+    rotatingP90.rotate(90);
+    rotating180.rotate(180);
     scaling.scale(0.34375, 0.34375);
-    painter.setCompositionMode(QPainter::CompositionMode_Source);
 
     while(true){
         if(RecordVideo){
             if(!videoWriter.isOpened()) {
+                QSize qSize(640, 1024);
+                if(typeOfGimmera < 10){
+                    qSize.setWidth(640 + 220);
+                    qSize.setHeight(512);
+                }
+                if(combinedImage.isNull()){
+                    combinedImage = QImage(qSize, !frameImage[0].isNull()?frameImage[0].format():QImage::Format_ARGB32);
+                    if(painter.isActive()) painter.end();
+                    painter.begin(&combinedImage);
+                    painter.setCompositionMode(QPainter::CompositionMode_Source);
+                }
+
                 sprintf(videoName, "/media/pi/VUIR_DATA/%s/VuIRBoson_%03d.avi", sub_folder_name, videoNumber++);
-                qDebug() << "\n\n\n\nvideoName = " << videoName;
+                qDebug() << "\n\nvideoName = " << videoName;
                 videoWriter.open(videoName, combinedImage.size());
                 gettimeofday(&now, nullptr);
                 frameImageNumber = 0;
@@ -103,9 +116,14 @@ void SaveVidFramesThread::run()
                     frameImageNumber = startFrameNo;
                 }
                 if(allAreNotNull()){
-                    painter.drawImage(220, 0, frameImage[globalVideoViewOrderNo]);
-                    for (int i = 1; i < NumberOfCameras; i++) {
-                        painter.drawImage(0, (i - 1) * 171, frameImage[Video_View_Matrix[i]].transformed(scaling));
+                    if(typeOfGimmera < 10){
+                        painter.drawImage(220, 0, frameImage[globalVideoViewOrderNo]);
+                        for (int i = 1; i < NumberOfCameras; i++) {
+                            painter.drawImage(0, (i - 1) * 171, frameImage[Video_View_Matrix[i]].transformed(scaling));
+                        }
+                    } else {
+                        painter.drawImage(0, 0, frameImage[0].transformed(rotating180));//.transformed(rotatingM90));
+                        painter.drawImage(0, 512, frameImage[1]);//.transformed(rotatingP90));
                     }
                     resetFlags();
                     if(!combinedImage.isNull()) {
