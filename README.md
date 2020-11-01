@@ -1,10 +1,10 @@
 # GetThermal
 
-[![Build Status](https://travis-ci.org/groupgets/GetThermal.svg?branch=master)](https://travis-ci.org/groupgets/GetThermal)
+[![Build Status]()
 
 A cross-platform thermal camera viewer application.
 
-![GetThermal screenshot](https://groupgets-files.s3.amazonaws.com/lepton/getthermal_app.png)
+![GetThermal screenshot]()
 
 # Supported Platforms
 
