@@ -20,17 +20,20 @@ int32_t ColorLutSetControl;
 #define FAILED 0
 
 int Value(1), Value_pre(0);
-int PINOUT(0), PINOUT_pre(0);
+int CHANNEL(0), CHANNEL_pre(0);
 
 bool SaveAPicture = false;
 bool RecordVideo = false;
 bool StopVideoRecording = false;
 void FolderTasks(uint16_t BosonResolution0);
+void colorLutSetIdAll(const FLR_COLORLUT_ID_E Palette);
+void zoomTowAtOnce(int zoomInput);
 char sub_folder_name[50] = "";
 int Cams_Value_Limit[6] = {50, 100, 100, 100, 100, 100}; //{25, 50, 75, 100}
 int Cams_DigiZoom_Limit[6] = {49/2, 49, 49, 49, 49, 49}; //{MaxZoom/2, MaxZoom/2, MaxZoom/2, MaxZoom}
 int Video_View_Matrix[6] = {0, 1, 2, 3, 4, 5};
 int fdI2C = -1;
+bool allCamsAtOnce = false;
 
 void CalBatteryPercentage(float& battPercentage, int BattVoltageX10);
 //https://www.arduino.cc/reference/en/language/functions/math/map/
@@ -118,7 +121,7 @@ void qml_Swapviews(){
     qDebug() << "After invokeMethod, qml returns needToSwapViews = " << needToSwapViews;
 }
 
-void readG2AMessage(int& readstatus, int& signalValueout, int& PINOUT, uint8_t *message)
+void readG2AMessage(int& readstatus, int& signalValueout, int& CHANNEL, uint8_t *message)
 {
   int16_t c;
   uint8_t checksum_cal;
@@ -167,7 +170,7 @@ void readG2AMessage(int& readstatus, int& signalValueout, int& PINOUT, uint8_t *
         #endif
         readstatus = PASSED;
         signalValueout = signalValue;
-        PINOUT = message[totallength - 4];
+        CHANNEL = message[totallength - 4];
       }
       else if (message[3] == 0x02)
       {
@@ -179,7 +182,7 @@ void readG2AMessage(int& readstatus, int& signalValueout, int& PINOUT, uint8_t *
           byteToINT_16(message + 22, &(MAV_GPS.vy));
           byteToINT_16(message + 24, &(MAV_GPS.vz));
           byteToUINT_16(message + 26, &(MAV_GPS.hdg));
-          PINOUT = message[28];
+          CHANNEL = message[28];
           readstatus = PASSED;
           signalValueout = totallength;
           HIL_GPS.lat = MAV_GPS.lat;
@@ -191,7 +194,7 @@ void readG2AMessage(int& readstatus, int& signalValueout, int& PINOUT, uint8_t *
       else if (message[3] == 0x03)
       {
         /*byteToUINT_32(message + 4, &UNIX_TIME);
-          PINOUT = message[8];
+          CHANNEL = message[8];
           readstatus = PASSED;
           signalValueout = totallength;
           //printf("UNIX Time = %d\n", UNIX_TIME);*/
@@ -218,11 +221,11 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
   //CheckVoltage();
   //HD_msg_send(palette);
 
-  readG2AMessage(readstatus, Value, PINOUT, message);
+  readG2AMessage(readstatus, Value, CHANNEL, message);
 
   if ((readstatus == PASSED))// && (Value != Value_pre))
   {
-    switch (PINOUT)
+    switch (CHANNEL)
     {
       /*case GIMMODE_CHANNEL:
         break;*/
@@ -243,7 +246,7 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
           Palette = (FLR_COLORLUT_ID_E)Value; //map(Value / 5, 0, 20, FLR_COLORLUT_DEFAULT, FLR_COLORLUT_ID_END);
           if (Palette < FLR_COLORLUT_DEFAULT) Palette = FLR_COLORLUT_DEFAULT;
           if (Palette > FLR_COLORLUT_ID_END) Palette = FLR_COLORLUT_ID_END;
-          colorLutSetId(Palette);
+          colorLutSetIdAll(Palette);
         }
         break;
 
@@ -260,26 +263,27 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
 
       case ZOOM_CHANNEL:
         {
-            ZoomParams.xCenter = BosonResolution[0] / 2;
-            ZoomParams.yCenter = BosonResolution[1] / 2;
-            mainViewNumber_pre = mainViewNumber;
-
-            find_Main_View_Number_and_Calculate_its_digiZoom(Value, &mainViewNumber);
-
-            globalVideoViewOrderNo = mainViewNumber;
-            scalerSetZoom(ZoomParams);
-
             if(mainViewNumber != mainViewNumber_pre && typeOfGimmera < 10){
+                ZoomParams.xCenter = BosonResolution[0] / 2;
+                ZoomParams.yCenter = BosonResolution[1] / 2;
+                mainViewNumber_pre = mainViewNumber;
+                find_Main_View_Number_and_Calculate_its_digiZoom(Value, &mainViewNumber);
+
+                globalVideoViewOrderNo = mainViewNumber;
+                scalerSetZoom(ZoomParams);
+
                 ocv_streaming[mainViewNumber] = 1;                
                 /*if(mainViewNumber == 0) {ocv_streaming[1] = 1; ocv_streaming[2] = 0; ocv_streaming[3] = 0;}
                 else if(mainViewNumber == 1) {ocv_streaming[2] = 1; ocv_streaming[3] = 0; ocv_streaming[0] = 0;}
                 else if(mainViewNumber == 2) {ocv_streaming[3] = 1; ocv_streaming[0] = 0; ocv_streaming[1] = 0;}
                 else if(mainViewNumber == 3) {ocv_streaming[0] = 1; ocv_streaming[1] = 0; ocv_streaming[2] = 0;}*/
-                colorLutSetId(Palette);//To unify the palettes
+                colorLutSetIdAll(Palette);//To unify the palettes
                 //usleep(150000); // abit of delay to set palette to the main-view-to-be before displaying it to ease the eyes: QML is faster than boson itself
                 needToSwapViews = true;
                 mainViewNo = mainViewNumber;
                 qml_Swapviews();
+            } else {
+                zoomTowAtOnce(Value*MaxZoom/100);
             }
         }
         break;
@@ -332,6 +336,9 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
       case GIM_VIDQUAL_CHANNEL:
         video_save_quality = Value;
         qDebug() << "Video save quality = " << video_save_quality;
+        break;
+      case ALL_CAMS_ATONCE_CHANNEL:
+        allCamsAtOnce = (Value == 1);
         break;
       case YEAR_CHANNEL:
         yy = Value + 2000;
@@ -584,4 +591,34 @@ void FolderTasks(uint16_t BosonResolution0){
     printf(WHT ">>> Folder " YEL "%s" WHT " selected to record files\n", sub_folder_name);
     system("pwd");
     fflush(stdout);
+}
+
+void colorLutSetIdAll(const FLR_COLORLUT_ID_E Palette){
+    if(allCamsAtOnce){
+        int _globalVideoViewOrderNo = globalVideoViewOrderNo;
+        for(int i = 0; i < NumberOfCameras; i++){
+            globalVideoViewOrderNo = i;
+            colorLutSetId(Palette);
+        }
+        globalVideoViewOrderNo = _globalVideoViewOrderNo;
+    } else {
+        colorLutSetId(Palette);
+    }
+}
+
+void zoomTowAtOnce(int zoomInput){
+    if(typeOfGimmera != 21) return;
+
+    int _globalVideoViewOrderNo = globalVideoViewOrderNo;
+    FLR_SCALER_ZOOM_PARAMS_T zoomParams;
+    zoomParams.zoom = zoomInput;
+    zoomParams.xCenter = 320;
+    zoomParams.yCenter = 0;
+
+    globalVideoViewOrderNo = 0;
+    scalerSetZoom(zoomParams);
+    globalVideoViewOrderNo = 1;
+    scalerSetZoom(zoomParams);
+
+    globalVideoViewOrderNo = _globalVideoViewOrderNo;
 }

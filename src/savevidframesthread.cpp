@@ -130,7 +130,7 @@ void SaveVidFramesThread::run()
                     resetFlags();
                     if(!combinedImage.isNull()) {
                         frameImageNumber++;
-                        QtConcurrent::run(this, &SaveVidFramesThread::addFrameThreadFunc, 40);//video_save_quality);
+                        QtConcurrent::run(this, &SaveVidFramesThread::addFrameThreadFunc, video_save_quality);
                     }
                 }
                 if(frameImageNumber%60 == 0){ //Todo change this to 60 if use full60fps_VuIRThermal
