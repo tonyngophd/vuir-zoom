@@ -263,7 +263,7 @@ void AG_message_actions(uint8_t *message, uint16_t BosonResolution[2], uint32_t 
 
       case ZOOM_CHANNEL:
         {
-            if(mainViewNumber != mainViewNumber_pre && typeOfGimmera < 10){
+            if(typeOfGimmera < 10){
                 ZoomParams.xCenter = BosonResolution[0] / 2;
                 ZoomParams.yCenter = BosonResolution[1] / 2;
                 mainViewNumber_pre = mainViewNumber;
