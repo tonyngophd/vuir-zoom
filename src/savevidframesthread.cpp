@@ -17,7 +17,7 @@ bool frameRecording = false;
 bool needToFFMPEG = false;
 int uvc_instance = 0;
 int uvc_start_number[4] = {0, 1, 2, 3};
-int ocv_instance = 0;
+int ocv_instance = 2;
 int ocv_start_number[4] = {0, 1, 2, 3};
 int ocv_streaming[4] = {1, 1, 1, 1};
 QMutex gQmutex;
