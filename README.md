@@ -18,7 +18,7 @@
     <a href="https://github.com/suasllc/vuir-zoom/wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://vuir-zoom.herokuapp.com/">View Demo/Live</a>
+    <a href="https://youtu.be/d1FKRNGz8qg">View Demo/Live</a>
     ·
     <a href="https://github.com/suasllc/vuir-zoom/issues">Report Bug</a>
     ·
