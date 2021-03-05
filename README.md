@@ -196,10 +196,6 @@ Project Link: [https://github.com/suasllc/vuir-zoom](https://github.com/suasllc/
 
 ## Acknowledgements
 
-* [App Academy](https://www.appacademy.io/)
-* [D. Miller](https://github.com/dbmille2)
-* [Drone Pilot Communities]()
-* [Unsplash](https://unsplash.com/)
 * [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
 
 
